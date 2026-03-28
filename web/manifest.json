@@ -1,11 +1,11 @@
 {
-    "name": "Nuance",
-    "short_name": "Nuance",
+    "name": "nuance",
+    "short_name": "nuance",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Nuance starter app scaffold.",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

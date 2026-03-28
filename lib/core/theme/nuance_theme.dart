@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 abstract final class NuancePalette {
+  // Light mode colors
   static const Color primary = Color(0xFF2563EB);
   static const Color primaryDark = Color(0xFF1D4ED8);
   static const Color secondary = Color(0xFF7C3AED);
@@ -35,6 +36,15 @@ abstract final class NuancePalette {
   static const Color redText = Color(0xFFDC2626);
   static const Color purpleText = Color(0xFF6D28D9);
   static const Color blueText = Color(0xFF1E40AF);
+
+  // Dark mode colors (Duolingo-inspired)
+  static const Color darkBg = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkSecondary = Color(0xFF3F3F3F);
+  static const Color darkTertiary = Color(0xFF58C4DC); // Duolingo cyan
+  static const Color darkAccent = Color(0xFF58C4DC);
+  static const Color darkText = Color(0xFFFFFFFF);
+  static const Color darkMutedText = Color(0xFFBBBBBB);
 }
 
 ThemeData buildNuanceTheme() {
@@ -130,6 +140,104 @@ ThemeData buildNuanceTheme() {
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: NuancePalette.warning,
       foregroundColor: NuancePalette.ink,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    ),
+  );
+}
+
+ThemeData buildNuanceDarkTheme() {
+  final textBase = GoogleFonts.poppinsTextTheme();
+
+  final textTheme = textBase.copyWith(
+    headlineSmall: textBase.headlineSmall?.copyWith(
+      fontWeight: FontWeight.w800,
+      color: NuancePalette.darkText,
+      fontSize: 28,
+    ),
+    titleLarge: textBase.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: NuancePalette.darkText,
+      fontSize: 18,
+    ),
+    titleMedium: textBase.titleMedium?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: NuancePalette.darkText,
+      fontSize: 16,
+    ),
+    bodyLarge: textBase.bodyLarge?.copyWith(
+      color: NuancePalette.darkText,
+      height: 1.4,
+      fontWeight: FontWeight.w600,
+    ),
+    bodyMedium: textBase.bodyMedium?.copyWith(
+      color: NuancePalette.darkMutedText,
+      height: 1.4,
+      fontWeight: FontWeight.w500,
+    ),
+    bodySmall: textBase.bodySmall?.copyWith(
+      color: NuancePalette.darkMutedText,
+      fontWeight: FontWeight.w500,
+      fontSize: 13,
+    ),
+    labelLarge: textBase.labelLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+      color: NuancePalette.darkText,
+    ),
+    labelMedium: textBase.labelMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+      color: NuancePalette.darkMutedText,
+    ),
+  );
+
+  final scheme = ColorScheme.fromSeed(
+    seedColor: NuancePalette.darkTertiary,
+    primary: NuancePalette.darkTertiary,
+    surface: NuancePalette.darkSurface,
+    brightness: Brightness.dark,
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: scheme,
+    scaffoldBackgroundColor: NuancePalette.darkBg,
+    textTheme: textTheme,
+    appBarTheme: AppBarTheme(
+      backgroundColor: NuancePalette.darkSurface,
+      foregroundColor: NuancePalette.darkText,
+      surfaceTintColor: Colors.transparent,
+      titleTextStyle: textTheme.titleLarge,
+    ),
+    cardTheme: CardThemeData(
+      color: NuancePalette.darkSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+        side: const BorderSide(color: NuancePalette.darkSecondary, width: 2),
+      ),
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: NuancePalette.darkTertiary,
+      linearTrackColor: Color(0xFF3F3F3F),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: NuancePalette.darkTertiary,
+        foregroundColor: Colors.black,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+      side: BorderSide(color: NuancePalette.darkSecondary),
+      labelStyle: textTheme.labelMedium,
+      selectedColor: NuancePalette.darkTertiary.withValues(alpha: 0.3),
+      backgroundColor: NuancePalette.darkSecondary,
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: NuancePalette.darkTertiary,
+      foregroundColor: Colors.black,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
   );

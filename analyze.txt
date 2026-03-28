@@ -1,0 +1,8 @@
+﻿INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\database_service.dart|23|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\database_service.dart|30|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\user_repository.dart|13|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\user_repository.dart|16|9|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\user_repository.dart|19|9|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\user_repository.dart|32|9|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\core\\data\\user_repository.dart|36|7|5|Don't invoke 'print' in production code.
+INFO|LINT|AVOID_PRINT|C:\\Users\\rapha\\Nuance\\lib\\main.dart|31|5|5|Don't invoke 'print' in production code.

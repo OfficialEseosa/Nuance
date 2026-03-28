@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
@@ -102,7 +104,15 @@ class _ArenaScreenState extends State<ArenaScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final completion = 2 / kChallengeModules.length;
+    final user = context.watch<UserProvider>().user;
+
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final completedLessons = user.completedLessons;
+    final totalLessons = kChallengeModules.length;
+    final completion = totalLessons > 0 ? completedLessons / totalLessons : 0.0;
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -187,7 +197,7 @@ class _ArenaScreenState extends State<ArenaScreen>
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: Text(
-                              '2/${kChallengeModules.length}',
+                              '$completedLessons/$totalLessons',
                               style: theme.textTheme.labelMedium?.copyWith(
                                 color: NuancePalette.warning,
                                 fontWeight: FontWeight.w700,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
@@ -10,9 +12,43 @@ import 'package:nuance/core/widgets/section_title.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  String _getLevelTitle(int level) {
+    switch (level) {
+      case 1:
+        return 'Novice';
+      case 2:
+        return 'Learner';
+      case 3:
+        return 'Contributor';
+      case 4:
+        return 'Analyst';
+      case 5:
+        return 'Expert';
+      case 6:
+        return 'Scholar';
+      case 7:
+        return 'Master';
+      case 8:
+        return 'Sage';
+      case 9:
+        return 'Luminary';
+      case 10:
+        return 'Visionary';
+      default:
+        return 'Visionary+';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = context.watch<UserProvider>().user;
+
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final levelTitle = _getLevelTitle(user.level);
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -32,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Raphael',
+                    user.username,
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 26,
@@ -54,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      'Level 6: Analyst',
+                      'Level ${user.level}: $levelTitle',
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -64,19 +100,19 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: const [
+                    children: [
                       _ProfileStat(
-                        value: '420',
+                        value: '${user.totalXp}',
                         label: 'Total XP',
                         color: NuancePalette.secondary,
                       ),
                       _ProfileStat(
-                        value: '7',
+                        value: '${user.streak}',
                         label: 'Day Streak',
                         color: NuancePalette.warning,
                       ),
                       _ProfileStat(
-                        value: '2',
+                        value: '${user.badges}',
                         label: 'Badges',
                         color: NuancePalette.success,
                       ),

@@ -11,6 +11,8 @@ class NuanceApp extends StatelessWidget {
       title: 'Nuance',
       debugShowCheckedModeBanner: false,
       theme: buildNuanceTheme(),
+      darkTheme: buildNuanceDarkTheme(),
+      themeMode: ThemeMode.dark, // Default to dark mode
       home: const NuanceShell(),
     );
   }

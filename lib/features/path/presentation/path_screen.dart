@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
@@ -128,9 +130,55 @@ class _PathScreenState extends State<PathScreen>
     super.dispose();
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good morning';
+    } else if (hour < 18) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  }
+
+  String _getLevelTitle(int level) {
+    switch (level) {
+      case 1:
+        return 'Novice';
+      case 2:
+        return 'Learner';
+      case 3:
+        return 'Contributor';
+      case 4:
+        return 'Analyst';
+      case 5:
+        return 'Expert';
+      case 6:
+        return 'Scholar';
+      case 7:
+        return 'Master';
+      case 8:
+        return 'Sage';
+      case 9:
+        return 'Luminary';
+      case 10:
+        return 'Visionary';
+      default:
+        return 'Visionary+';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = context.watch<UserProvider>().user;
+
+    if (user == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    final xpProgress = user.xp % 100;
+    final greeting = _getGreeting();
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -149,7 +197,7 @@ class _PathScreenState extends State<PathScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Good morning, Raphael! 👋',
+                            '$greeting, ${user.username}! 👋',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 28,
@@ -179,36 +227,36 @@ class _PathScreenState extends State<PathScreen>
               child: SlideTransition(
                 position: _statsSlide,
                 child: Row(
-                  children: const [
+                  children: [
                     Expanded(
                       child: _TopStatCard(
                         label: 'Streak',
-                        value: '7',
+                        value: '${user.streak}',
                         footnote: 'days',
                         icon: Icons.local_fire_department_rounded,
                         borderColor: NuancePalette.cardOrangeBorder,
                         gradientColors: [
                           NuancePalette.cardOrangeBg,
-                          Color(0xFFFCD34D)
+                          const Color(0xFFFCD34D)
                         ],
                         textColor: NuancePalette.orangeText,
-                        iconColor: Color(0xFFF59E0B),
+                        iconColor: const Color(0xFFF59E0B),
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: _TopStatCard(
                         label: 'Level',
-                        value: '6',
-                        footnote: 'Analyst',
+                        value: '${user.level}',
+                        footnote: _getLevelTitle(user.level),
                         icon: Icons.star_rounded,
                         borderColor: NuancePalette.cardYellowBorder,
                         gradientColors: [
                           NuancePalette.cardYellowBg,
-                          Color(0xFFFCD34D)
+                          const Color(0xFFFCD34D)
                         ],
                         textColor: NuancePalette.yellowText,
-                        iconColor: Color(0xFFDCBA34),
+                        iconColor: const Color(0xFFDCBA34),
                       ),
                     ),
                   ],
@@ -241,7 +289,7 @@ class _PathScreenState extends State<PathScreen>
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Level 6 Progress',
+                            'Level ${user.level} Progress',
                             style: theme.textTheme.labelLarge
                                 ?.copyWith(fontSize: 14),
                           ),
@@ -251,7 +299,7 @@ class _PathScreenState extends State<PathScreen>
                       ClipRRect(
                         borderRadius: BorderRadius.circular(999),
                         child: LinearProgressIndicator(
-                          value: 0.64,
+                          value: xpProgress / 100,
                           minHeight: 12,
                           color: NuancePalette.secondary,
                           backgroundColor: const Color(0xFFE9D5FF),
@@ -259,7 +307,7 @@ class _PathScreenState extends State<PathScreen>
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '64 / 100 XP (36 to next level)',
+                        '$xpProgress / 100 XP (${100 - xpProgress} to next level)',
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
