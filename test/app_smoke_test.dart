@@ -6,6 +6,7 @@ import 'package:nuance/core/data/news_service.dart';
 import 'package:nuance/core/models/news_story.dart';
 import 'package:nuance/core/providers/game_progress_provider.dart';
 import 'package:nuance/core/providers/news_provider.dart';
+import 'package:nuance/core/providers/theme_provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,6 +83,7 @@ void main() {
     final mockProvider = MockUserProvider();
     final newsProvider = NewsProvider(FakeNewsService());
     final gameProgressProvider = GameProgressProvider();
+    final themeProvider = ThemeProvider();
 
     await tester.pumpWidget(
       MultiProvider(
@@ -91,6 +93,7 @@ void main() {
           ChangeNotifierProvider<GameProgressProvider>.value(
             value: gameProgressProvider,
           ),
+          ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
         ],
         child: const NuanceApp(),
       ),

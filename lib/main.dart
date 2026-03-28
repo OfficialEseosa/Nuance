@@ -9,6 +9,7 @@ import 'package:nuance/core/data/database_service.dart';
 import 'package:nuance/core/data/news_service.dart';
 import 'package:nuance/core/providers/game_progress_provider.dart';
 import 'package:nuance/core/providers/news_provider.dart';
+import 'package:nuance/core/providers/theme_provider.dart';
 import 'package:nuance/core/data/user_repository.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 
@@ -27,6 +28,9 @@ void main() async {
     // Trigger database initialization early
     await databaseService.database;
 
+    final themeProvider = ThemeProvider();
+    await themeProvider.initialize();
+
     final userRepository = UserRepository(databaseService);
     final newsService = NewsService();
 
@@ -35,6 +39,7 @@ void main() async {
         providers: [
           Provider(create: (_) => userRepository),
           Provider(create: (_) => newsService),
+          ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
           ChangeNotifierProvider(create: (_) => UserProvider(userRepository)),
           ChangeNotifierProvider(create: (_) => NewsProvider(newsService)),
           ChangeNotifierProvider(create: (_) => GameProgressProvider()),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/models/user_model.dart';
+import 'package:nuance/core/providers/theme_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
+import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   final UserModel user;
@@ -95,10 +97,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _toggleThemeMode(bool useDarkMode) async {
+    final mode = useDarkMode ? ThemeMode.dark : ThemeMode.light;
+    await context.read<ThemeProvider>().setThemeMode(mode);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(useDarkMode ? 'Dark mode enabled' : 'Light mode enabled'),
+        duration: const Duration(milliseconds: 1400),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
     final theme = Theme.of(context);
-    final isDarkMode = theme.brightness == Brightness.dark;
+    final isDarkMode = themeProvider.isDarkMode;
 
     return Scaffold(
       appBar: AppBar(
@@ -254,6 +269,69 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Switch.adaptive(
                   value: _soundEnabled,
                   onChanged: _toggleSoundEffects,
+                  activeThumbColor: NuancePalette.primary,
+                  activeTrackColor: NuancePalette.primary.withValues(
+                    alpha: 0.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDarkMode
+                    ? NuancePalette.darkSecondary
+                    : NuancePalette.border,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? NuancePalette.darkSecondary
+                        : const Color(0xFFF4F6FA),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isDarkMode
+                        ? Icons.dark_mode_rounded
+                        : Icons.light_mode_rounded,
+                    color: isDarkMode
+                        ? NuancePalette.darkAccent
+                        : NuancePalette.warning,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dark Mode',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Switch between dark and light themes.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: isDarkMode,
+                  onChanged: _toggleThemeMode,
                   activeThumbColor: NuancePalette.primary,
                   activeTrackColor: NuancePalette.primary.withValues(
                     alpha: 0.35,

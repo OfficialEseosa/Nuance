@@ -6,7 +6,7 @@ Nuance is a gamified media-literacy app concept: Ground News-style perspective c
 
 - multi-screen starter architecture
 - shared design system based on the imported React/Figma design (`History Learning App`)
-- dark mode by default with a Duolingo-inspired game UI direction
+- dark mode by default with light mode toggle in Settings
 - mock data for missions, perspectives, challenges, and badges
 - live RSS news ingestion (multi-source) with automatic fallback if feeds fail
 - event clustering so `Compare` opens the same topic across multiple outlets

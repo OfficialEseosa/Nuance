@@ -301,7 +301,7 @@ class _DockItem extends StatelessWidget {
                 child: Icon(
                   tab.icon,
                   size: 23,
-                  color: active ? const Color(0xFF102026) : inactiveColor,
+                  color: active ? Colors.white : inactiveColor,
                 ),
               ),
               const SizedBox(height: 4),

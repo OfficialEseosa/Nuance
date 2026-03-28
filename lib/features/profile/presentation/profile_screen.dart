@@ -43,7 +43,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = NuancePalette.isDark(context);
     final user = context.watch<UserProvider>().user;
     final progress = context.watch<GameProgressProvider>();
 
@@ -110,7 +109,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Text(
                       'Level ${user.level}: $levelTitle',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: isDark ? const Color(0xFF102026) : Colors.white,
+                        color: Colors.white,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
