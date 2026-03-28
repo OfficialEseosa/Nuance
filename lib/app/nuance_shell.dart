@@ -63,6 +63,14 @@ class _NuanceShellState extends State<NuanceShell> {
     ).push(MaterialPageRoute<void>(builder: (_) => const StoryCompareScreen()));
   }
 
+  void _openLearnTab() {
+    if (_selectedIndex == 2) {
+      SoundService.instance.playPop();
+      return;
+    }
+    setState(() => _selectedIndex = 2);
+  }
+
   void _onSelectTab(int index) {
     if (_selectedIndex == index) {
       SoundService.instance.playPop();
@@ -117,7 +125,10 @@ class _NuanceShellState extends State<NuanceShell> {
         final isDark = NuancePalette.isDark(context);
 
         final screens = [
-          const PathScreen(),
+          PathScreen(
+            onOpenStoryCompare: _openStoryCompare,
+            onStartLearning: _openLearnTab,
+          ),
           LensScreen(onOpenStoryCompare: _openStoryCompare),
           const ArenaScreen(),
           const ProfileScreen(),

@@ -1,16 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
 import 'package:nuance/core/widgets/nuance_gradient_background.dart';
 import 'package:nuance/core/widgets/section_title.dart';
+import 'package:provider/provider.dart';
 
-class LensScreen extends StatelessWidget {
+class LensScreen extends StatefulWidget {
   const LensScreen({required this.onOpenStoryCompare, super.key});
 
   final VoidCallback onOpenStoryCompare;
+
+  @override
+  State<LensScreen> createState() => _LensScreenState();
+}
+
+class _LensScreenState extends State<LensScreen> {
+  static const List<String> _categories = [
+    'All',
+    'Politics',
+    'Climate',
+    'Global',
+  ];
+
+  int _selectedCategoryIndex = 0;
+  final Set<String> _comparedSources = <String>{};
+
+  String get _selectedCategory => _categories[_selectedCategoryIndex];
+
+  List<StoryPerspective> get _visibleStories {
+    switch (_selectedCategory) {
+      case 'Politics':
+        return kStoryPerspectives
+            .where(
+              (story) =>
+                  story.headline.toLowerCase().contains('senate') ||
+                  story.headline.toLowerCase().contains('package'),
+            )
+            .toList();
+      case 'Climate':
+        return kStoryPerspectives
+            .where((story) => story.headline.toLowerCase().contains('climate'))
+            .toList();
+      case 'Global':
+        return kStoryPerspectives
+            .where(
+              (story) =>
+                  story.source.toLowerCase().contains('national') ||
+                  story.source.toLowerCase().contains('frontier'),
+            )
+            .toList();
+      case 'All':
+      default:
+        return kStoryPerspectives;
+    }
+  }
+
+  void _selectCategory(int index) {
+    if (_selectedCategoryIndex == index) return;
+    SoundService.instance.playTap();
+    setState(() => _selectedCategoryIndex = index);
+  }
+
+  Future<void> _openStoryCompare(StoryPerspective story) async {
+    widget.onOpenStoryCompare();
+
+    if (_comparedSources.contains(story.source)) return;
+
+    _comparedSources.add(story.source);
+    await context.read<UserProvider>().addXP(5);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Compared ${story.source}. +5 XP'),
+        duration: const Duration(milliseconds: 1400),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,28 +124,49 @@ class LensScreen extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: const [
-                  _CategoryChip(label: 'All', tint: NuancePalette.primary),
-                  SizedBox(width: 10),
-                  _CategoryChip(label: 'Politics', tint: Color(0xFF2563EB)),
-                  SizedBox(width: 10),
-                  _CategoryChip(label: 'Climate', tint: Color(0xFF22C55E)),
-                  SizedBox(width: 10),
-                  _CategoryChip(label: 'Global', tint: Color(0xFF7C3AED)),
-                ],
+                children: List.generate(_categories.length, (index) {
+                  final label = _categories[index];
+                  final tint = switch (label) {
+                    'All' => NuancePalette.primary,
+                    'Politics' => const Color(0xFF2563EB),
+                    'Climate' => const Color(0xFF22C55E),
+                    'Global' => const Color(0xFF7C3AED),
+                    _ => NuancePalette.primary,
+                  };
+
+                  return Padding(
+                    padding: EdgeInsets.only(right: index == 3 ? 0 : 10),
+                    child: _CategoryChip(
+                      label: label,
+                      tint: tint,
+                      isActive: _selectedCategoryIndex == index,
+                      onTap: () => _selectCategory(index),
+                    ),
+                  );
+                }),
               ),
             ),
             const SizedBox(height: 18),
-            ...List.generate(kStoryPerspectives.length, (index) {
-              final story = kStoryPerspectives[index];
+            ...List.generate(_visibleStories.length, (index) {
+              final story = _visibleStories[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: _PerspectiveCard(
                   perspective: story,
-                  onTap: onOpenStoryCompare,
+                  onTap: () => _openStoryCompare(story),
                 ),
               );
             }),
+            if (_visibleStories.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: NuanceCard(
+                  child: Text(
+                    'No stories found for $_selectedCategory right now.',
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ),
             NuanceCard(
               borderColor: NuancePalette.cardPurpleBorder,
               gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
@@ -91,7 +182,10 @@ class LensScreen extends StatelessWidget {
                     title: 'Frame Radar',
                     subtitle: 'How outlets currently shape this story.',
                     trailing: FilledButton.tonal(
-                      onPressed: onOpenStoryCompare,
+                      onPressed: () {
+                        SoundService.instance.playTap();
+                        widget.onOpenStoryCompare();
+                      },
                       child: const Text('Deep Dive'),
                     ),
                   ),
@@ -288,30 +382,53 @@ class _FrameSignalBar extends StatelessWidget {
 }
 
 class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.label, required this.tint});
+  const _CategoryChip({
+    required this.label,
+    required this.tint,
+    required this.isActive,
+    required this.onTap,
+  });
 
   final String label;
   final Color tint;
+  final bool isActive;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final isDark = NuancePalette.isDark(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-      decoration: BoxDecoration(
-        color: isDark ? NuancePalette.darkSecondary : Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark
-              ? NuancePalette.darkStroke
-              : tint.withValues(alpha: 0.48),
-          width: 2,
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: isDark ? NuancePalette.darkText : tint,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+          decoration: BoxDecoration(
+            color: isActive
+                ? tint.withValues(alpha: isDark ? 0.28 : 0.18)
+                : isDark
+                ? NuancePalette.darkSecondary
+                : Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isActive
+                  ? tint
+                  : isDark
+                  ? NuancePalette.darkStroke
+                  : tint.withValues(alpha: 0.48),
+              width: 2,
+            ),
+          ),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: isActive ? tint : (isDark ? NuancePalette.darkText : tint),
+              fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );

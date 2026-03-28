@@ -26,6 +26,7 @@ class _ArenaScreenState extends State<ArenaScreen>
   late Animation<Offset> _headerSlide;
   late Animation<double> _progressFade;
   late Animation<Offset> _progressSlide;
+  final Set<int> _completedModuleIndices = <int>{};
 
   @override
   void initState() {
@@ -114,7 +115,7 @@ class _ArenaScreenState extends State<ArenaScreen>
       return const Center(child: CircularProgressIndicator());
     }
 
-    final completedLessons = user.completedLessons;
+    final completedLessons = _completedModuleIndices.length;
     final totalLessons = kChallengeModules.length;
     final completion = totalLessons > 0 ? completedLessons / totalLessons : 0.0;
 
@@ -276,8 +277,9 @@ class _ArenaScreenState extends State<ArenaScreen>
                     child: _ChallengeCard(
                       module: module,
                       index: index + 1,
-                      completed: index == 0,
-                      locked: index == 2,
+                      completed: _isCompleted(index),
+                      locked: _isLocked(index),
+                      onPlay: () => _onModulePressed(index, module),
                     ),
                   ),
                 ),
@@ -285,6 +287,49 @@ class _ArenaScreenState extends State<ArenaScreen>
             }),
           ],
         ),
+      ),
+    );
+  }
+
+  bool _isCompleted(int index) => _completedModuleIndices.contains(index);
+
+  bool _isLocked(int index) {
+    if (index == 0) return false;
+    return !_completedModuleIndices.contains(index - 1);
+  }
+
+  Future<void> _onModulePressed(int index, ChallengeModule module) async {
+    if (_isLocked(index)) {
+      SoundService.instance.playPop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Complete the previous module first.'),
+          duration: Duration(milliseconds: 1400),
+        ),
+      );
+      return;
+    }
+
+    final alreadyCompleted = _isCompleted(index);
+    final xpReward = alreadyCompleted
+        ? (module.xpReward ~/ 3).clamp(5, module.xpReward)
+        : module.xpReward;
+
+    if (alreadyCompleted) {
+      SoundService.instance.playTap();
+    } else {
+      SoundService.instance.playSuccess();
+      setState(() => _completedModuleIndices.add(index));
+    }
+
+    await context.read<UserProvider>().addXP(xpReward);
+    if (!mounted) return;
+
+    final action = alreadyCompleted ? 'Replay complete' : 'Module complete';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$action. +$xpReward XP'),
+        duration: const Duration(milliseconds: 1400),
       ),
     );
   }
@@ -296,12 +341,14 @@ class _ChallengeCard extends StatefulWidget {
     required this.index,
     required this.completed,
     required this.locked,
+    required this.onPlay,
   });
 
   final ChallengeModule module;
   final int index;
   final bool completed;
   final bool locked;
+  final VoidCallback onPlay;
 
   @override
   State<_ChallengeCard> createState() => _ChallengeCardState();
@@ -509,15 +556,7 @@ class _ChallengeCardState extends State<_ChallengeCard>
                         ),
                       ),
                       FilledButton.tonal(
-                        onPressed: widget.locked
-                            ? null
-                            : () {
-                                if (widget.completed) {
-                                  SoundService.instance.playPop();
-                                } else {
-                                  SoundService.instance.playTap();
-                                }
-                              },
+                        onPressed: widget.locked ? null : widget.onPlay,
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,

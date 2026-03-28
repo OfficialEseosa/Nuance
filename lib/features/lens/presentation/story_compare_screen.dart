@@ -1,17 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/data/mock_content.dart';
+import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
 import 'package:nuance/core/widgets/nuance_gradient_background.dart';
+import 'package:provider/provider.dart';
 
-class StoryCompareScreen extends StatelessWidget {
+class StoryCompareScreen extends StatefulWidget {
   const StoryCompareScreen({super.key});
+
+  @override
+  State<StoryCompareScreen> createState() => _StoryCompareScreenState();
+}
+
+class _StoryCompareScreenState extends State<StoryCompareScreen> {
+  static const int _correctAnswerIndex = 0;
+
+  int? _selectedAnswerIndex;
+  bool _submitted = false;
+  bool _rewardClaimed = false;
+
+  void _selectAnswer(int index) {
+    if (_submitted) return;
+    SoundService.instance.playTap();
+    setState(() => _selectedAnswerIndex = index);
+  }
+
+  Future<void> _submitAnswer() async {
+    if (_selectedAnswerIndex == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pick an answer before submitting.'),
+          duration: Duration(milliseconds: 1400),
+        ),
+      );
+      return;
+    }
+
+    final isCorrect = _selectedAnswerIndex == _correctAnswerIndex;
+    setState(() => _submitted = true);
+
+    if (isCorrect) {
+      SoundService.instance.playSuccess();
+      if (!_rewardClaimed) {
+        await context.read<UserProvider>().addXP(20);
+        if (!mounted) return;
+        setState(() => _rewardClaimed = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Correct. +20 XP'),
+            duration: Duration(milliseconds: 1400),
+          ),
+        );
+      }
+      return;
+    }
+
+    SoundService.instance.playPop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Not quite. Try again.'),
+        duration: Duration(milliseconds: 1400),
+      ),
+    );
+  }
+
+  void _resetChallenge() {
+    SoundService.instance.playTap();
+    setState(() {
+      _selectedAnswerIndex = null;
+      _submitted = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = NuancePalette.isDark(context);
+    final isCorrect = _selectedAnswerIndex == _correctAnswerIndex;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Story Comparison')),
@@ -141,29 +208,68 @@ class StoryCompareScreen extends StatelessWidget {
                     style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
-                  ...[
-                    _AnswerOption(
-                      'A',
-                      'Long-term grid infrastructure timeline',
-                      isDark: isDark,
-                    ),
-                    _AnswerOption(
-                      'B',
-                      'List of political endorsements only',
-                      isDark: isDark,
-                    ),
-                    _AnswerOption(
-                      'C',
-                      'Unverified social media reactions',
-                      isDark: isDark,
+                  _AnswerOption(
+                    label: 'A',
+                    answerText: 'Long-term grid infrastructure timeline',
+                    isDark: isDark,
+                    isSelected: _selectedAnswerIndex == 0,
+                    isSubmitted: _submitted,
+                    isCorrect: true,
+                    onTap: () => _selectAnswer(0),
+                  ),
+                  _AnswerOption(
+                    label: 'B',
+                    answerText: 'List of political endorsements only',
+                    isDark: isDark,
+                    isSelected: _selectedAnswerIndex == 1,
+                    isSubmitted: _submitted,
+                    isCorrect: false,
+                    onTap: () => _selectAnswer(1),
+                  ),
+                  _AnswerOption(
+                    label: 'C',
+                    answerText: 'Unverified social media reactions',
+                    isDark: isDark,
+                    isSelected: _selectedAnswerIndex == 2,
+                    isSubmitted: _submitted,
+                    isCorrect: false,
+                    onTap: () => _selectAnswer(2),
+                  ),
+                  if (_submitted) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      isCorrect
+                          ? 'Great catch. This adds structural context to both narratives.'
+                          : 'Hint: pick the option that adds verifiable context, not opinion noise.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: isCorrect
+                            ? NuancePalette.success
+                            : NuancePalette.warning,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () {
-                      SoundService.instance.playSuccess();
-                    },
-                    child: const Text('Submit and earn 20 XP'),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FilledButton(
+                          onPressed: _submitAnswer,
+                          child: Text(
+                            _rewardClaimed
+                                ? 'Challenge Completed'
+                                : 'Submit and earn 20 XP',
+                          ),
+                        ),
+                      ),
+                      if (_submitted && !isCorrect) ...[
+                        const SizedBox(width: 8),
+                        FilledButton.tonal(
+                          onPressed: _resetChallenge,
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -274,44 +380,92 @@ class _CoveragePanel extends StatelessWidget {
 }
 
 class _AnswerOption extends StatelessWidget {
-  const _AnswerOption(this.label, this.answerText, {required this.isDark});
+  const _AnswerOption({
+    required this.label,
+    required this.answerText,
+    required this.isDark,
+    required this.isSelected,
+    required this.isSubmitted,
+    required this.isCorrect,
+    required this.onTap,
+  });
 
   final String label;
   final String answerText;
   final bool isDark;
+  final bool isSelected;
+  final bool isSubmitted;
+  final bool isCorrect;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-      decoration: BoxDecoration(
-        color: isDark ? NuancePalette.darkSecondary : const Color(0xFFF3F4F6),
+    final baseBg = isDark
+        ? NuancePalette.darkSecondary
+        : const Color(0xFFF3F4F6);
+    Color bgColor = baseBg;
+    Color borderColor = isDark
+        ? NuancePalette.darkStroke
+        : const Color(0xFFD1D5DB);
+
+    if (isSubmitted && isCorrect) {
+      bgColor = NuancePalette.success.withValues(alpha: 0.18);
+      borderColor = NuancePalette.success;
+    } else if (isSubmitted && isSelected && !isCorrect) {
+      bgColor = NuancePalette.danger.withValues(alpha: 0.15);
+      borderColor = NuancePalette.danger;
+    } else if (isSelected) {
+      bgColor = NuancePalette.primary.withValues(alpha: 0.16);
+      borderColor = NuancePalette.primary;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? NuancePalette.darkStroke : const Color(0xFFD1D5DB),
-        ),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 13,
-            backgroundColor: NuancePalette.primary.withValues(alpha: 0.14),
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: NuancePalette.primaryDark,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 13,
+                backgroundColor: NuancePalette.primary.withValues(alpha: 0.14),
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: NuancePalette.primaryDark,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  answerText,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              if (isSubmitted && isCorrect)
+                const Icon(
+                  Icons.check_circle_rounded,
+                  color: NuancePalette.success,
+                  size: 18,
+                ),
+              if (isSubmitted && isSelected && !isCorrect)
+                const Icon(
+                  Icons.cancel_rounded,
+                  color: NuancePalette.danger,
+                  size: 18,
+                ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              answerText,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

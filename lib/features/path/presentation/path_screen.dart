@@ -8,7 +8,14 @@ import 'package:nuance/core/widgets/nuance_card.dart';
 import 'package:nuance/core/widgets/nuance_gradient_background.dart';
 
 class PathScreen extends StatefulWidget {
-  const PathScreen({super.key});
+  const PathScreen({
+    required this.onOpenStoryCompare,
+    required this.onStartLearning,
+    super.key,
+  });
+
+  final VoidCallback onOpenStoryCompare;
+  final VoidCallback onStartLearning;
 
   @override
   State<PathScreen> createState() => _PathScreenState();
@@ -379,7 +386,7 @@ class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
                         width: double.infinity,
                         child: FilledButton(
                           onPressed: () {
-                            SoundService.instance.playTap();
+                            widget.onOpenStoryCompare();
                           },
                           style: FilledButton.styleFrom(
                             backgroundColor: isDark
@@ -414,6 +421,7 @@ class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
                 child: FilledButton(
                   onPressed: () {
                     SoundService.instance.playSuccess();
+                    widget.onStartLearning();
                   },
                   style: FilledButton.styleFrom(
                     backgroundColor: isDark
