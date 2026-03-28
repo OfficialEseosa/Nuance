@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:provider/provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
@@ -13,8 +14,7 @@ class PathScreen extends StatefulWidget {
   State<PathScreen> createState() => _PathScreenState();
 }
 
-class _PathScreenState extends State<PathScreen>
-    with TickerProviderStateMixin {
+class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
   late AnimationController _greetingController;
   late AnimationController _statsController;
   late AnimationController _progressController;
@@ -68,37 +68,47 @@ class _PathScreenState extends State<PathScreen>
     _greetingFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _greetingController, curve: Curves.easeOut),
     );
-    _greetingSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
-        .animate(
-      CurvedAnimation(parent: _greetingController, curve: Curves.easeOutCubic),
-    );
+    _greetingSlide =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _greetingController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     // Stats animation
-    _statsFade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _statsController, curve: Curves.easeOut),
-    );
+    _statsFade = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _statsController, curve: Curves.easeOut));
     _statsSlide = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero)
         .animate(
-      CurvedAnimation(parent: _statsController, curve: Curves.easeOutCubic),
-    );
+          CurvedAnimation(parent: _statsController, curve: Curves.easeOutCubic),
+        );
 
     // Progress animation
     _progressFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _progressController, curve: Curves.easeOut),
     );
-    _progressSlide = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero)
-        .animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
-    );
+    _progressSlide =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _progressController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     // Trending animation
     _trendingFade = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _trendingController, curve: Curves.easeOut),
     );
-    _trendingSlide = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero)
-        .animate(
-      CurvedAnimation(parent: _trendingController, curve: Curves.easeOutCubic),
-    );
+    _trendingSlide =
+        Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _trendingController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     // Pulse animation for mascot
 
@@ -171,6 +181,7 @@ class _PathScreenState extends State<PathScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = NuancePalette.isDark(context);
     final user = context.watch<UserProvider>().user;
 
     if (user == null) {
@@ -197,7 +208,7 @@ class _PathScreenState extends State<PathScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '$greeting, ${user.username}! 👋',
+                            '$greeting, ${user.username}',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 28,
@@ -237,7 +248,7 @@ class _PathScreenState extends State<PathScreen>
                         borderColor: NuancePalette.cardOrangeBorder,
                         gradientColors: [
                           NuancePalette.cardOrangeBg,
-                          const Color(0xFFFCD34D)
+                          const Color(0xFFFCD34D),
                         ],
                         textColor: NuancePalette.orangeText,
                         iconColor: const Color(0xFFF59E0B),
@@ -253,7 +264,7 @@ class _PathScreenState extends State<PathScreen>
                         borderColor: NuancePalette.cardYellowBorder,
                         gradientColors: [
                           NuancePalette.cardYellowBg,
-                          const Color(0xFFFCD34D)
+                          const Color(0xFFFCD34D),
                         ],
                         textColor: NuancePalette.yellowText,
                         iconColor: const Color(0xFFDCBA34),
@@ -274,7 +285,7 @@ class _PathScreenState extends State<PathScreen>
                   borderColor: NuancePalette.cardPurpleBorder,
                   gradientColors: [
                     NuancePalette.cardPurpleBg,
-                    const Color(0xFFF3E8FF)
+                    const Color(0xFFF3E8FF),
                   ],
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -290,8 +301,9 @@ class _PathScreenState extends State<PathScreen>
                           const SizedBox(width: 8),
                           Text(
                             'Level ${user.level} Progress',
-                            style: theme.textTheme.labelLarge
-                                ?.copyWith(fontSize: 14),
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontSize: 14,
+                            ),
                           ),
                         ],
                       ),
@@ -326,7 +338,7 @@ class _PathScreenState extends State<PathScreen>
                   borderColor: NuancePalette.cardRedBorder,
                   gradientColors: [
                     NuancePalette.cardRedBg,
-                    const Color(0xFFFEE2E2)
+                    const Color(0xFFFEE2E2),
                   ],
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -355,7 +367,6 @@ class _PathScreenState extends State<PathScreen>
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: NuancePalette.ink,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -367,10 +378,16 @@ class _PathScreenState extends State<PathScreen>
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            SoundService.instance.playTap();
+                          },
                           style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: NuancePalette.danger,
+                            backgroundColor: isDark
+                                ? NuancePalette.darkSecondary
+                                : Colors.white,
+                            foregroundColor: isDark
+                                ? NuancePalette.darkText
+                                : NuancePalette.danger,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                               side: const BorderSide(
@@ -395,9 +412,13 @@ class _PathScreenState extends State<PathScreen>
               child: SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    SoundService.instance.playSuccess();
+                  },
                   style: FilledButton.styleFrom(
-                    backgroundColor: NuancePalette.primary,
+                    backgroundColor: isDark
+                        ? NuancePalette.darkPrimary
+                        : NuancePalette.primary,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -411,7 +432,9 @@ class _PathScreenState extends State<PathScreen>
                       Text(
                         'Start Learning',
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
+                          color: isDark
+                              ? const Color(0xFF102026)
+                              : Colors.white,
                           fontSize: 16,
                         ),
                       ),
@@ -451,10 +474,17 @@ class _TopStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = NuancePalette.isDark(context);
+    final effectiveTextColor = isDark ? NuancePalette.darkText : textColor;
+    final effectiveIconColor = isDark ? NuancePalette.darkAccent : iconColor;
 
     return NuanceCard(
       borderColor: borderColor,
       gradientColors: gradientColors,
+      darkGradientColors: const [
+        NuancePalette.darkCard,
+        NuancePalette.darkSurface,
+      ],
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,7 +492,7 @@ class _TopStatCard extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: textColor,
+              color: effectiveTextColor,
               fontWeight: FontWeight.w700,
               fontSize: 11,
             ),
@@ -479,19 +509,19 @@ class _TopStatCard extends StatelessWidget {
                     style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 28,
-                      color: textColor,
+                      color: effectiveTextColor,
                     ),
                   ),
                   Text(
                     footnote,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: textColor,
+                      color: effectiveTextColor.withValues(alpha: 0.84),
                       fontSize: 11,
                     ),
                   ),
                 ],
               ),
-              Icon(icon, color: iconColor, size: 40),
+              Icon(icon, color: effectiveIconColor, size: 40),
             ],
           ),
         ],

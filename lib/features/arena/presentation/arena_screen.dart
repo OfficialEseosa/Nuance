@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:provider/provider.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
@@ -59,8 +60,11 @@ class _ArenaScreenState extends State<ArenaScreen>
     );
     _headerSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
         .animate(
-      CurvedAnimation(parent: _headerController, curve: Curves.easeOutCubic),
-    );
+          CurvedAnimation(
+            parent: _headerController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
 
     // Progress animations
     _progressFade = Tween<double>(begin: 0, end: 1).animate(
@@ -68,8 +72,11 @@ class _ArenaScreenState extends State<ArenaScreen>
     );
     _progressSlide =
         Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
-      CurvedAnimation(parent: _progressController, curve: Curves.easeOutCubic),
-    );
+          CurvedAnimation(
+            parent: _progressController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
   }
 
   void _startAnimations() {
@@ -80,14 +87,11 @@ class _ArenaScreenState extends State<ArenaScreen>
 
     // Stagger card animations
     for (int i = 0; i < _cardControllers.length; i++) {
-      Future.delayed(
-        Duration(milliseconds: 300 + (i * 100)),
-        () {
-          if (mounted) {
-            _cardControllers[i].forward();
-          }
-        },
-      );
+      Future.delayed(Duration(milliseconds: 300 + (i * 100)), () {
+        if (mounted) {
+          _cardControllers[i].forward();
+        }
+      });
     }
   }
 
@@ -131,7 +135,7 @@ class _ArenaScreenState extends State<ArenaScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '📚 Learn',
+                            'Learn',
                             style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w800,
                               fontSize: 28,
@@ -165,7 +169,11 @@ class _ArenaScreenState extends State<ArenaScreen>
                   borderColor: NuancePalette.cardPurpleBorder,
                   gradientColors: [
                     NuancePalette.cardPurpleBg,
-                    const Color(0xFFF3E8FF)
+                    const Color(0xFFF3E8FF),
+                  ],
+                  darkGradientColors: const [
+                    NuancePalette.darkCard,
+                    NuancePalette.darkSurface,
                   ],
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -188,10 +196,8 @@ class _ArenaScreenState extends State<ArenaScreen>
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  NuancePalette.warning
-                                      .withValues(alpha: 0.2),
-                                  NuancePalette.warning
-                                      .withValues(alpha: 0.15),
+                                  NuancePalette.warning.withValues(alpha: 0.2),
+                                  NuancePalette.warning.withValues(alpha: 0.15),
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(999),
@@ -213,7 +219,9 @@ class _ArenaScreenState extends State<ArenaScreen>
                           value: completion,
                           minHeight: 12,
                           color: NuancePalette.secondary,
-                          backgroundColor: const Color(0xFFE9D5FF),
+                          backgroundColor: NuancePalette.isDark(context)
+                              ? NuancePalette.darkSecondary
+                              : const Color(0xFFE9D5FF),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -236,9 +244,7 @@ class _ArenaScreenState extends State<ArenaScreen>
                 children: [
                   Text(
                     'Practice Modules',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontSize: 18,
-                    ),
+                    style: theme.textTheme.titleLarge?.copyWith(fontSize: 18),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -255,15 +261,16 @@ class _ArenaScreenState extends State<ArenaScreen>
               return FadeTransition(
                 opacity: _cardControllers[index],
                 child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 0.3),
-                    end: Offset.zero,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: _cardControllers[index],
-                      curve: Curves.easeOutCubic,
-                    ),
-                  ),
+                  position:
+                      Tween<Offset>(
+                        begin: const Offset(0, 0.3),
+                        end: Offset.zero,
+                      ).animate(
+                        CurvedAnimation(
+                          parent: _cardControllers[index],
+                          curve: Curves.easeOutCubic,
+                        ),
+                      ),
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _ChallengeCard(
@@ -320,8 +327,8 @@ class _ChallengeCardState extends State<_ChallengeCard>
 
     _offset = Tween<Offset>(begin: Offset.zero, end: const Offset(0, -0.08))
         .animate(
-      CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
-    );
+          CurvedAnimation(parent: _hoverController, curve: Curves.easeInOut),
+        );
   }
 
   @override
@@ -361,8 +368,13 @@ class _ChallengeCardState extends State<_ChallengeCard>
                   : widget.locked
                   ? const Color(0xFFD1D5DB)
                   : _difficultyColor.withValues(alpha: 0.45),
-              backgroundColor:
-                  widget.completed ? const Color(0xFFECFDF5) : Colors.white,
+              backgroundColor: widget.completed
+                  ? const Color(0xFFECFDF5)
+                  : Colors.white,
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -378,16 +390,16 @@ class _ChallengeCardState extends State<_ChallengeCard>
                             colors: widget.completed
                                 ? [
                                     const Color(0xFF22C55E),
-                                    const Color(0xFF16A34A)
+                                    const Color(0xFF16A34A),
                                   ]
                                 : widget.locked
                                 ? [
                                     const Color(0xFF9CA3AF),
-                                    const Color(0xFF6B7280)
+                                    const Color(0xFF6B7280),
                                   ]
                                 : [
                                     NuancePalette.primary,
-                                    NuancePalette.secondary
+                                    NuancePalette.secondary,
                                   ],
                           ),
                           boxShadow: [
@@ -497,7 +509,15 @@ class _ChallengeCardState extends State<_ChallengeCard>
                         ),
                       ),
                       FilledButton.tonal(
-                        onPressed: widget.locked ? null : () {},
+                        onPressed: widget.locked
+                            ? null
+                            : () {
+                                if (widget.completed) {
+                                  SoundService.instance.playPop();
+                                } else {
+                                  SoundService.instance.playTap();
+                                }
+                              },
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,

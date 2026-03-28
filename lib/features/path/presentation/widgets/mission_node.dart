@@ -37,9 +37,11 @@ class MissionNode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+    final isDark = NuancePalette.isDark(context);
     final textColor = mission.status == MissionStatus.locked
-        ? NuancePalette.mutedInk
-        : NuancePalette.ink;
+        ? NuancePalette.mutedTextColor(context)
+        : onSurface;
     final activeOutline = switch (mission.status) {
       MissionStatus.completed => NuancePalette.success.withValues(alpha: 0.55),
       MissionStatus.active => NuancePalette.primary.withValues(alpha: 0.55),
@@ -53,7 +55,7 @@ class MissionNode extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? NuancePalette.darkCard : Colors.white,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(color: activeOutline, width: 2),
           boxShadow: const [
@@ -123,15 +125,17 @@ class _TinyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: NuancePalette.isDark(context)
+            ? NuancePalette.darkSecondary
+            : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFD1D5DB)),
+        border: Border.all(color: NuancePalette.borderColor(context)),
       ),
       child: Text(
         text,
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(color: NuancePalette.ink),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
       ),
     );
   }

@@ -42,6 +42,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = NuancePalette.isDark(context);
     final user = context.watch<UserProvider>().user;
 
     if (user == null) {
@@ -58,6 +59,10 @@ class ProfileScreen extends StatelessWidget {
             NuanceCard(
               borderColor: NuancePalette.cardPurpleBorder,
               gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFEDE9FE)],
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
@@ -92,7 +97,7 @@ class ProfileScreen extends StatelessWidget {
                     child: Text(
                       'Level ${user.level}: $levelTitle',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF102026) : Colors.white,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -127,6 +132,10 @@ class ProfileScreen extends StatelessWidget {
             NuanceCard(
               borderColor: NuancePalette.cardYellowBorder,
               gradientColors: [NuancePalette.cardYellowBg, Color(0xFFFEF3C7)],
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,11 +159,18 @@ class ProfileScreen extends StatelessWidget {
             NuanceCard(
               borderColor: NuancePalette.cardOrangeBorder,
               gradientColors: [NuancePalette.cardOrangeBg, Color(0xFFFEF8C3)],
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Streak Tracker', style: theme.textTheme.titleMedium?.copyWith(fontSize: 16)),
+                  Text(
+                    'Streak Tracker',
+                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 16),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Keep learning daily to maintain your streak.',
@@ -279,19 +295,24 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColor = Theme.of(context).colorScheme.onSurface;
 
     return NuanceCard(
       backgroundColor: tint,
       borderColor: Colors.transparent,
+      darkGradientColors: const [
+        NuancePalette.darkCard,
+        NuancePalette.darkSurface,
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: NuancePalette.ink),
+          Icon(icon, color: textColor),
           const Spacer(),
           Text(
             value,
             style: theme.textTheme.titleMedium?.copyWith(
-              color: NuancePalette.ink,
+              color: textColor,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -311,6 +332,7 @@ class _BadgeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColor = Theme.of(context).colorScheme.onSurface;
     final tint = badge.unlocked
         ? NuancePalette.warning
         : const Color(0xFF9CA3AF);
@@ -334,7 +356,7 @@ class _BadgeTile extends StatelessWidget {
                 Text(
                   badge.name,
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: NuancePalette.ink,
+                    color: textColor,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -364,8 +386,12 @@ class _DayBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = NuancePalette.isDark(context);
     final bg = active ? const Color(0xFFF59E0B) : const Color(0xFFE5E7EB);
-    final fg = active ? Colors.white : NuancePalette.mutedInk;
+    final fg = active
+        ? (isDark ? const Color(0xFF102026) : Colors.white)
+        : Theme.of(context).textTheme.bodySmall?.color ??
+              NuancePalette.mutedInk;
 
     return Column(
       children: [

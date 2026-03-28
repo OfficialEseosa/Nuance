@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 abstract final class NuancePalette {
-  // Light mode colors
   static const Color primary = Color(0xFF2563EB);
   static const Color primaryDark = Color(0xFF1D4ED8);
   static const Color secondary = Color(0xFF7C3AED);
@@ -10,11 +9,11 @@ abstract final class NuancePalette {
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
   static const Color accentBlue = Color(0xFF3B82F6);
-  // Web design pastel gradient colors
+
   static const Color gradientBlue = Color(0xFFDBEAFE);
   static const Color gradientPurple = Color(0xFFF3E8FF);
   static const Color gradientPink = Color(0xFFFCE7F3);
-  // Card accent colors
+
   static const Color cardOrangeBorder = Color(0xFFFEDCBA);
   static const Color cardOrangeBg = Color(0xFFFEF3C7);
   static const Color cardYellowBorder = Color(0xFFFEE08B);
@@ -25,26 +24,48 @@ abstract final class NuancePalette {
   static const Color cardRedBg = Color(0xFFFEE2E2);
   static const Color cardBlueBorder = Color(0xFFBFDBFE);
   static const Color cardBlueBg = Color(0xFFEFF6FF);
+
   static const Color surface = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFF8FAFC);
   static const Color ink = Color(0xFF111827);
   static const Color mutedInk = Color(0xFF6B7280);
   static const Color border = Color(0xFFD1D5DB);
-  // Text colors for cards
+
   static const Color orangeText = Color(0xFF92400E);
   static const Color yellowText = Color(0xFF854D0E);
   static const Color redText = Color(0xFFDC2626);
   static const Color purpleText = Color(0xFF6D28D9);
   static const Color blueText = Color(0xFF1E40AF);
 
-  // Dark mode colors (Duolingo-inspired)
-  static const Color darkBg = Color(0xFF121212);
-  static const Color darkSurface = Color(0xFF1E1E1E);
-  static const Color darkSecondary = Color(0xFF3F3F3F);
-  static const Color darkTertiary = Color(0xFF58C4DC); // Duolingo cyan
-  static const Color darkAccent = Color(0xFF58C4DC);
-  static const Color darkText = Color(0xFFFFFFFF);
-  static const Color darkMutedText = Color(0xFFBBBBBB);
+  // Duolingo-inspired dark palette
+  static const Color darkBg = Color(0xFF131F24);
+  static const Color darkSurface = Color(0xFF1F2D35);
+  static const Color darkCard = Color(0xFF243642);
+  static const Color darkSecondary = Color(0xFF364A56);
+  static const Color darkStroke = Color(0xFF4B5E69);
+  static const Color darkPrimary = Color(0xFF58CC02);
+  static const Color darkAccent = Color(0xFF1CB0F6);
+  static const Color darkText = Color(0xFFF7FBFC);
+  static const Color darkMutedText = Color(0xFFB4C2C9);
+  static const Color darkGradientTop = Color(0xFF0F1A20);
+  static const Color darkGradientMid = Color(0xFF14252E);
+  static const Color darkGradientBottom = Color(0xFF1B2F3A);
+
+  static bool isDark(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
+
+  static Color textColor(BuildContext context) {
+    return isDark(context) ? darkText : ink;
+  }
+
+  static Color mutedTextColor(BuildContext context) {
+    return isDark(context) ? darkMutedText : mutedInk;
+  }
+
+  static Color borderColor(BuildContext context) {
+    return isDark(context) ? darkStroke : border;
+  }
 }
 
 ThemeData buildNuanceTheme() {
@@ -189,12 +210,18 @@ ThemeData buildNuanceDarkTheme() {
     ),
   );
 
-  final scheme = ColorScheme.fromSeed(
-    seedColor: NuancePalette.darkTertiary,
-    primary: NuancePalette.darkTertiary,
-    surface: NuancePalette.darkSurface,
-    brightness: Brightness.dark,
-  );
+  final scheme =
+      ColorScheme.fromSeed(
+        seedColor: NuancePalette.darkPrimary,
+        primary: NuancePalette.darkPrimary,
+        secondary: NuancePalette.darkAccent,
+        surface: NuancePalette.darkSurface,
+        brightness: Brightness.dark,
+      ).copyWith(
+        onPrimary: const Color(0xFF0F1A20),
+        onSurface: NuancePalette.darkText,
+        onSecondary: const Color(0xFF0F1A20),
+      );
 
   return ThemeData(
     useMaterial3: true,
@@ -202,42 +229,42 @@ ThemeData buildNuanceDarkTheme() {
     scaffoldBackgroundColor: NuancePalette.darkBg,
     textTheme: textTheme,
     appBarTheme: AppBarTheme(
-      backgroundColor: NuancePalette.darkSurface,
+      backgroundColor: Colors.transparent,
       foregroundColor: NuancePalette.darkText,
       surfaceTintColor: Colors.transparent,
       titleTextStyle: textTheme.titleLarge,
     ),
     cardTheme: CardThemeData(
-      color: NuancePalette.darkSurface,
+      color: NuancePalette.darkCard,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(24),
-        side: const BorderSide(color: NuancePalette.darkSecondary, width: 2),
+        side: const BorderSide(color: NuancePalette.darkStroke, width: 2),
       ),
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: NuancePalette.darkTertiary,
-      linearTrackColor: Color(0xFF3F3F3F),
+      color: NuancePalette.darkAccent,
+      linearTrackColor: NuancePalette.darkSecondary,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: NuancePalette.darkTertiary,
-        foregroundColor: Colors.black,
+        backgroundColor: NuancePalette.darkPrimary,
+        foregroundColor: const Color(0xFF0F1A20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w800),
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
       ),
     ),
     chipTheme: ChipThemeData(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      side: BorderSide(color: NuancePalette.darkSecondary),
+      side: const BorderSide(color: NuancePalette.darkStroke),
       labelStyle: textTheme.labelMedium,
-      selectedColor: NuancePalette.darkTertiary.withValues(alpha: 0.3),
+      selectedColor: NuancePalette.darkAccent.withValues(alpha: 0.35),
       backgroundColor: NuancePalette.darkSecondary,
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: NuancePalette.darkTertiary,
-      foregroundColor: Colors.black,
+      backgroundColor: NuancePalette.darkPrimary,
+      foregroundColor: const Color(0xFF0F1A20),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
   );

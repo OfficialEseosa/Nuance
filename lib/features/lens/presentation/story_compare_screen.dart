@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
@@ -10,6 +11,7 @@ class StoryCompareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = NuancePalette.isDark(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Story Comparison')),
@@ -20,6 +22,10 @@ class StoryCompareScreen extends StatelessWidget {
             NuanceCard(
               borderColor: const Color(0xFFBFDBFE),
               backgroundColor: const Color(0xFFEFF6FF),
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -44,6 +50,10 @@ class StoryCompareScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             NuanceCard(
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -117,6 +127,10 @@ class StoryCompareScreen extends StatelessWidget {
             const SizedBox(height: 14),
             NuanceCard(
               borderColor: const Color(0xFFD8B4FE),
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -124,22 +138,31 @@ class StoryCompareScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'Which missing context would make both narratives more complete?',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: NuancePalette.ink,
-                    ),
+                    style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 12),
-                  ...const [
+                  ...[
                     _AnswerOption(
                       'A',
                       'Long-term grid infrastructure timeline',
+                      isDark: isDark,
                     ),
-                    _AnswerOption('B', 'List of political endorsements only'),
-                    _AnswerOption('C', 'Unverified social media reactions'),
+                    _AnswerOption(
+                      'B',
+                      'List of political endorsements only',
+                      isDark: isDark,
+                    ),
+                    _AnswerOption(
+                      'C',
+                      'Unverified social media reactions',
+                      isDark: isDark,
+                    ),
                   ],
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      SoundService.instance.playSuccess();
+                    },
                     child: const Text('Submit and earn 20 XP'),
                   ),
                 ],
@@ -147,6 +170,10 @@ class StoryCompareScreen extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             NuanceCard(
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -197,6 +224,10 @@ class _CoveragePanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NuanceCard(
+      darkGradientColors: const [
+        NuancePalette.darkCard,
+        NuancePalette.darkSurface,
+      ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -243,10 +274,11 @@ class _CoveragePanel extends StatelessWidget {
 }
 
 class _AnswerOption extends StatelessWidget {
-  const _AnswerOption(this.label, this.answerText);
+  const _AnswerOption(this.label, this.answerText, {required this.isDark});
 
   final String label;
   final String answerText;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -254,9 +286,11 @@ class _AnswerOption extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: isDark ? NuancePalette.darkSecondary : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFD1D5DB)),
+        border: Border.all(
+          color: isDark ? NuancePalette.darkStroke : const Color(0xFFD1D5DB),
+        ),
       ),
       child: Row(
         children: [

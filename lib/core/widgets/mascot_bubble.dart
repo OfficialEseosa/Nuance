@@ -15,13 +15,20 @@ class MascotBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = NuancePalette.isDark(context);
+
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.88),
+        color: isDark
+            ? NuancePalette.darkSecondary.withValues(alpha: 0.88)
+            : Colors.white.withValues(alpha: 0.88),
         borderRadius: BorderRadius.circular(size / 2),
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(
+          color: isDark ? NuancePalette.darkStroke : Colors.white,
+          width: 2,
+        ),
         boxShadow: const [
           BoxShadow(
             color: Color(0x22000000),

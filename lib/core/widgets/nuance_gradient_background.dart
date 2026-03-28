@@ -8,16 +8,24 @@ class NuanceGradientBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = NuancePalette.isDark(context);
+
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            NuancePalette.gradientBlue,
-            NuancePalette.gradientPurple,
-            NuancePalette.gradientPink,
-          ],
+          colors: isDark
+              ? const [
+                  NuancePalette.darkGradientTop,
+                  NuancePalette.darkGradientMid,
+                  NuancePalette.darkGradientBottom,
+                ]
+              : const [
+                  NuancePalette.gradientBlue,
+                  NuancePalette.gradientPurple,
+                  NuancePalette.gradientPink,
+                ],
         ),
       ),
       child: child,

@@ -22,11 +22,7 @@ class DatabaseService {
     try {
       String path = join(await getDatabasesPath(), 'nuance.db');
       debugPrint('DEBUG: Opening database at path: $path');
-      return await openDatabase(
-        path,
-        version: 1,
-        onCreate: _onCreate,
-      );
+      return await openDatabase(path, version: 1, onCreate: _onCreate);
     } catch (e) {
       debugPrint('DEBUG ERROR in _initDatabase: $e');
       rethrow;

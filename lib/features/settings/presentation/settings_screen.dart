@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/models/user_model.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 
@@ -20,11 +21,13 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late TextEditingController _usernameController;
+  late bool _soundEnabled;
 
   @override
   void initState() {
     super.initState();
     _usernameController = TextEditingController(text: widget.user.username);
+    _soundEnabled = SoundService.instance.enabled;
   }
 
   @override
@@ -80,6 +83,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _toggleSoundEffects(bool value) async {
+    setState(() => _soundEnabled = value);
+    await SoundService.instance.setEnabled(value);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(value ? 'Sound effects enabled' : 'Sound effects muted'),
+        duration: const Duration(milliseconds: 1400),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -109,8 +124,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDarkMode 
-                    ? NuancePalette.darkSecondary 
+                color: isDarkMode
+                    ? NuancePalette.darkSecondary
                     : NuancePalette.border,
                 width: 2,
               ),
@@ -178,6 +193,77 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 32),
 
+          // Experience Section
+          Text(
+            'Experience',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDarkMode
+                    ? NuancePalette.darkSecondary
+                    : NuancePalette.border,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: isDarkMode
+                        ? NuancePalette.darkSecondary
+                        : const Color(0xFFF4F6FA),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.music_note_rounded,
+                    color: isDarkMode
+                        ? NuancePalette.darkAccent
+                        : NuancePalette.accentBlue,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Sound Effects',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Play tap and reward sounds during gameplay.',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                Switch.adaptive(
+                  value: _soundEnabled,
+                  onChanged: _toggleSoundEffects,
+                  activeThumbColor: NuancePalette.primary,
+                  activeTrackColor: NuancePalette.primary.withValues(
+                    alpha: 0.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
           // Statistics Section
           Text(
             'Statistics',
@@ -193,8 +279,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDarkMode 
-                    ? NuancePalette.darkSecondary 
+                color: isDarkMode
+                    ? NuancePalette.darkSecondary
                     : NuancePalette.border,
                 width: 2,
               ),
@@ -207,10 +293,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Level',
-                          style: theme.textTheme.labelMedium,
-                        ),
+                        Text('Level', style: theme.textTheme.labelMedium),
                         const SizedBox(height: 4),
                         Text(
                           '${widget.user.level}',
@@ -223,10 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Total XP',
-                          style: theme.textTheme.labelMedium,
-                        ),
+                        Text('Total XP', style: theme.textTheme.labelMedium),
                         const SizedBox(height: 4),
                         Text(
                           '${widget.user.totalXp}',
@@ -239,10 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Streak',
-                          style: theme.textTheme.labelMedium,
-                        ),
+                        Text('Streak', style: theme.textTheme.labelMedium),
                         const SizedBox(height: 4),
                         Text(
                           '${widget.user.streak}',
@@ -285,8 +362,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: isDarkMode 
-                    ? NuancePalette.darkSecondary 
+                color: isDarkMode
+                    ? NuancePalette.darkSecondary
                     : NuancePalette.border,
                 width: 2,
               ),
@@ -297,24 +374,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'App Version',
-                      style: theme.textTheme.bodyMedium,
-                    ),
-                    Text(
-                      '1.0.0',
-                      style: theme.textTheme.bodySmall,
-                    ),
+                    Text('App Version', style: theme.textTheme.bodyMedium),
+                    Text('1.0.0', style: theme.textTheme.bodySmall),
                   ],
                 ),
                 const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Member Since',
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text('Member Since', style: theme.textTheme.bodyMedium),
                     Text(
                       _formatDate(widget.user.createdAt),
                       style: theme.textTheme.bodySmall,

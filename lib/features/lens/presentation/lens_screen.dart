@@ -15,6 +15,7 @@ class LensScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = NuancePalette.isDark(context);
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -78,6 +79,10 @@ class LensScreen extends StatelessWidget {
             NuanceCard(
               borderColor: NuancePalette.cardPurpleBorder,
               gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
+              darkGradientColors: const [
+                NuancePalette.darkCard,
+                NuancePalette.darkSurface,
+              ],
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,7 +96,9 @@ class LensScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  ...kFrameSignals.map(_FrameSignalBar.new),
+                  ...kFrameSignals.map(
+                    (signal) => _FrameSignalBar(signal, isDark: isDark),
+                  ),
                 ],
               ),
             ),
@@ -174,12 +181,7 @@ class _PerspectiveCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(perspective.source, style: theme.textTheme.labelLarge),
             const SizedBox(height: 4),
-            Text(
-              perspective.headline,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: NuancePalette.ink,
-              ),
-            ),
+            Text(perspective.headline, style: theme.textTheme.titleMedium),
             const SizedBox(height: 10),
             Text(perspective.framingNote, style: theme.textTheme.bodySmall),
             const SizedBox(height: 10),
@@ -188,7 +190,7 @@ class _PerspectiveCard extends StatelessWidget {
                 Text(
                   '3 sources',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: NuancePalette.ink,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -235,9 +237,10 @@ class _PerspectiveCard extends StatelessWidget {
 }
 
 class _FrameSignalBar extends StatelessWidget {
-  const _FrameSignalBar(this.signal);
+  const _FrameSignalBar(this.signal, {required this.isDark});
 
   final FrameSignal signal;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
@@ -253,7 +256,7 @@ class _FrameSignalBar extends StatelessWidget {
                 child: Text(
                   signal.label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: NuancePalette.ink,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -273,7 +276,9 @@ class _FrameSignalBar extends StatelessWidget {
               value: signal.value,
               minHeight: 10,
               color: NuancePalette.secondary,
-              backgroundColor: const Color(0xFFE9D5FF),
+              backgroundColor: isDark
+                  ? NuancePalette.darkSecondary
+                  : const Color(0xFFE9D5FF),
             ),
           ),
         ],
@@ -290,16 +295,24 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = NuancePalette.isDark(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? NuancePalette.darkSecondary : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: tint.withValues(alpha: 0.48), width: 2),
+        border: Border.all(
+          color: isDark
+              ? NuancePalette.darkStroke
+              : tint.withValues(alpha: 0.48),
+          width: 2,
+        ),
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(color: tint),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: isDark ? NuancePalette.darkText : tint,
+        ),
       ),
     );
   }

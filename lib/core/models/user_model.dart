@@ -21,8 +21,8 @@ class UserModel {
     this.badges = 0,
     DateTime? createdAt,
     DateTime? updatedAt,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   // Convert User to JSON
   Map<String, dynamic> toJson() {
@@ -51,10 +51,12 @@ class UserModel {
       totalXp: json['totalXp'] as int? ?? 0,
       completedLessons: json['completedLessons'] as int? ?? 0,
       badges: json['badges'] as int? ?? 0,
-      createdAt: json['createdAt'] != null && json['createdAt'].toString().isNotEmpty
+      createdAt:
+          json['createdAt'] != null && json['createdAt'].toString().isNotEmpty
           ? DateTime.parse(json['createdAt'].toString())
           : null,
-      updatedAt: json['updatedAt'] != null && json['updatedAt'].toString().isNotEmpty
+      updatedAt:
+          json['updatedAt'] != null && json['updatedAt'].toString().isNotEmpty
           ? DateTime.parse(json['updatedAt'].toString())
           : null,
     );

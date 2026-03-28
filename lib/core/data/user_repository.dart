@@ -63,10 +63,7 @@ class UserRepository {
     final db = await _databaseService.database;
     await db.update(
       'users',
-      {
-        'username': newUsername,
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
+      {'username': newUsername, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [userId],
     );
@@ -78,7 +75,7 @@ class UserRepository {
       int newXp = user.xp + amount;
       int newTotalXp = user.totalXp + amount;
       int newLevel = user.level;
-      
+
       // Level up every 100 XP
       while (newXp >= 100) {
         newXp -= 100;
@@ -86,11 +83,7 @@ class UserRepository {
       }
 
       await updateUser(
-        user.copyWith(
-          xp: newXp,
-          totalXp: newTotalXp,
-          level: newLevel,
-        ),
+        user.copyWith(xp: newXp, totalXp: newTotalXp, level: newLevel),
       );
     }
   }
@@ -99,10 +92,7 @@ class UserRepository {
     final db = await _databaseService.database;
     await db.update(
       'users',
-      {
-        'streak': streak,
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
+      {'streak': streak, 'updatedAt': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [userId],
     );

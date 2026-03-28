@@ -7,27 +7,27 @@ import 'package:nuance/core/models/user_model.dart';
 
 class MockUserProvider extends ChangeNotifier implements UserProvider {
   final UserModel _user = UserModel(
-    id: 1, 
-    username: 'Test', 
-    level: 1, 
-    xp: 0, 
-    streak: 0, 
-    totalXp: 0, 
-    completedLessons: 0, 
-    badges: 0, 
-    createdAt: DateTime.now(), 
-    updatedAt: DateTime.now()
+    id: 1,
+    username: 'Test',
+    level: 1,
+    xp: 0,
+    streak: 0,
+    totalXp: 0,
+    completedLessons: 0,
+    badges: 0,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
   );
-  
+
   @override
   UserModel? get user => _user;
-  
+
   @override
   bool get isLoading => false;
-  
+
   @override
   String? get error => null;
-  
+
   @override
   Future<void> initializeUser() async {}
 
@@ -46,7 +46,7 @@ class MockUserProvider extends ChangeNotifier implements UserProvider {
 void main() {
   testWidgets('Nuance shell renders primary tabs', (tester) async {
     final mockProvider = MockUserProvider();
-    
+
     await tester.pumpWidget(
       ChangeNotifierProvider<UserProvider>.value(
         value: mockProvider,

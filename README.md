@@ -6,8 +6,11 @@ Nuance is a gamified media-literacy app concept: Ground News-style perspective c
 
 - multi-screen starter architecture
 - shared design system based on the imported React/Figma design (`History Learning App`)
+- dark mode by default with a Duolingo-inspired game UI direction
 - mock data for missions, perspectives, challenges, and badges
 - separate feature folders so work can be split by screen
+- UI sound effects for taps/success events (`assets/sfx`)
+- global `Sound Effects` toggle in Settings (persisted across launches)
 
 ## Current Screens
 
@@ -41,6 +44,10 @@ Use this to minimize overlap and merge pain:
 ## Local Design Source
 
 - `History Learning App/` is intentionally ignored via `.gitignore` so it will not be committed.
+
+## Sound Effects
+
+- Source: Kenney "UI Audio" (CC0), downloaded into `assets/sfx/`.
 
 ## Run
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:nuance/core/theme/nuance_theme.dart';
+import 'package:nuance/core/audio/sound_service.dart';
 import 'package:nuance/core/providers/user_provider.dart';
+import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/features/arena/presentation/arena_screen.dart';
 import 'package:nuance/features/lens/presentation/lens_screen.dart';
 import 'package:nuance/features/lens/presentation/story_compare_screen.dart';
@@ -20,25 +21,55 @@ class _NuanceShellState extends State<NuanceShell> {
   int _selectedIndex = 0;
 
   static const _tabs = [
-    _ShellTab(icon: Icons.home_rounded, label: 'Home'),
-    _ShellTab(icon: Icons.newspaper_rounded, label: 'News'),
-    _ShellTab(icon: Icons.menu_book_rounded, label: 'Learn'),
-    _ShellTab(icon: Icons.person_rounded, label: 'Profile'),
-    _ShellTab(icon: Icons.settings_rounded, label: 'Settings'),
+    _ShellTab(
+      icon: Icons.home_rounded,
+      label: 'Home',
+      accent: Color(0xFF58CC02),
+    ),
+    _ShellTab(
+      icon: Icons.newspaper_rounded,
+      label: 'News',
+      accent: Color(0xFF1CB0F6),
+    ),
+    _ShellTab(
+      icon: Icons.menu_book_rounded,
+      label: 'Learn',
+      accent: Color(0xFFFFC800),
+    ),
+    _ShellTab(
+      icon: Icons.person_rounded,
+      label: 'Profile',
+      accent: Color(0xFFA560FF),
+    ),
+    _ShellTab(
+      icon: Icons.settings_rounded,
+      label: 'Settings',
+      accent: Color(0xFF8EA4AE),
+    ),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Initialize user data when app starts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserProvider>().initializeUser();
     });
   }
 
   void _openStoryCompare() {
-    Navigator.of(context)
-        .push(MaterialPageRoute<void>(builder: (_) => const StoryCompareScreen()));
+    SoundService.instance.playTap();
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const StoryCompareScreen()));
+  }
+
+  void _onSelectTab(int index) {
+    if (_selectedIndex == index) {
+      SoundService.instance.playPop();
+      return;
+    }
+    SoundService.instance.playTap();
+    setState(() => _selectedIndex = index);
   }
 
   @override
@@ -59,7 +90,7 @@ class _NuanceShellState extends State<NuanceShell> {
           return Scaffold(
             body: Center(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -71,7 +102,7 @@ class _NuanceShellState extends State<NuanceShell> {
                     Text(
                       userProvider.error ?? 'Unknown error',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.red,
+                        color: NuancePalette.danger,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -83,6 +114,7 @@ class _NuanceShellState extends State<NuanceShell> {
         }
 
         final user = userProvider.user!;
+        final isDark = NuancePalette.isDark(context);
 
         final screens = [
           const PathScreen(),
@@ -91,90 +123,57 @@ class _NuanceShellState extends State<NuanceShell> {
           const ProfileScreen(),
           SettingsScreen(
             user: user,
-            onUsernameChanged: (newUsername) {
-              userProvider.updateUsername(newUsername);
-            },
-            onResetStats: () {
-              userProvider.resetStats();
-            },
+            onUsernameChanged: (newUsername) =>
+                userProvider.updateUsername(newUsername),
+            onResetStats: userProvider.resetStats,
           ),
         ];
-
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
           body: IndexedStack(index: _selectedIndex, children: screens),
           bottomNavigationBar: SafeArea(
             top: false,
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDarkMode ? NuancePalette.darkSurface : Colors.white,
-                border: Border(
-                  top: BorderSide(
-                    color: isDarkMode
-                        ? NuancePalette.darkSecondary
-                        : const Color(0xFFE5E7EB),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: isDark
+                        ? const [Color(0xFF1E2B33), Color(0xFF18242C)]
+                        : const [Color(0xFFFFFFFF), Color(0xFFF7FAFC)],
+                  ),
+                  border: Border.all(
+                    color: NuancePalette.borderColor(context),
                     width: 2,
                   ),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(isDarkMode ? 0x1AFFFFFF : 0x1A000000),
-                    blurRadius: 24,
-                    offset: const Offset(0, -8),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(_tabs.length, (index) {
-                  final tab = _tabs[index];
-                  final active = _selectedIndex == index;
-                  final tint = active
-                      ? (isDarkMode
-                          ? NuancePalette.darkTertiary
-                          : NuancePalette.primary)
-                      : (isDarkMode
-                          ? NuancePalette.darkMutedText
-                          : NuancePalette.mutedInk);
-
-                  return InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => setState(() => _selectedIndex = index),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(tab.icon, color: tint, size: 24),
-                          const SizedBox(height: 4),
-                          Text(
-                            tab.label,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: tint,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            width: 4,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: active ? tint : Colors.transparent,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                          ),
-                        ],
-                      ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x2A000000),
+                      blurRadius: 22,
+                      offset: Offset(0, 10),
                     ),
-                  );
-                }),
+                  ],
+                ),
+                child: Row(
+                  children: List.generate(_tabs.length, (index) {
+                    final tab = _tabs[index];
+                    return Expanded(
+                      child: _DockItem(
+                        tab: tab,
+                        active: _selectedIndex == index,
+                        isDark: isDark,
+                        onTap: () => _onSelectTab(index),
+                      ),
+                    );
+                  }),
+                ),
               ),
             ),
           ),
@@ -185,8 +184,109 @@ class _NuanceShellState extends State<NuanceShell> {
 }
 
 class _ShellTab {
-  const _ShellTab({required this.icon, required this.label});
+  const _ShellTab({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
 
   final IconData icon;
   final String label;
+  final Color accent;
+}
+
+class _DockItem extends StatelessWidget {
+  const _DockItem({
+    required this.tab,
+    required this.active,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final _ShellTab tab;
+  final bool active;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final inactiveColor = isDark
+        ? NuancePalette.darkMutedText
+        : NuancePalette.mutedInk;
+    final iconBgColor = isDark
+        ? NuancePalette.darkSecondary
+        : const Color(0xFFEFF3F6);
+
+    return AnimatedScale(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOutBack,
+      scale: active ? 1.07 : 1,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  color: active ? null : iconBgColor,
+                  gradient: active
+                      ? LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            tab.accent,
+                            tab.accent.withValues(alpha: 0.7),
+                          ],
+                        )
+                      : null,
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: tab.accent.withValues(alpha: 0.34),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Icon(
+                  tab.icon,
+                  size: 23,
+                  color: active ? const Color(0xFF102026) : inactiveColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                tab.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: active ? tab.accent : inactiveColor,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 10,
+                ),
+              ),
+              const SizedBox(height: 2),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: active ? 18 : 0,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: active ? tab.accent : Colors.transparent,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

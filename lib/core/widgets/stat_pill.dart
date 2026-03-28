@@ -18,6 +18,7 @@ class StatPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textColor = NuancePalette.textColor(context);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -36,14 +37,12 @@ class StatPill extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: NuancePalette.ink,
-                ),
+                style: theme.textTheme.labelLarge?.copyWith(color: textColor),
               ),
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: NuancePalette.ink.withValues(alpha: 0.72),
+                  color: textColor.withValues(alpha: 0.72),
                 ),
               ),
             ],
