@@ -17,88 +17,81 @@ class ProfileScreen extends StatelessWidget {
     return NuanceGradientBackground(
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
           children: [
             NuanceCard(
-              borderColor: const Color(0xFFD8B4FE),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFF5F3FF), Color(0xFFDBEAFE)],
+              borderColor: NuancePalette.cardPurpleBorder,
+              gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFEDE9FE)],
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  const MascotBubble(
+                    size: 72,
+                    icon: Icons.emoji_events_rounded,
+                    iconColor: NuancePalette.warning,
                   ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    children: [
-                      const MascotBubble(
-                        size: 64,
-                        icon: Icons.emoji_events_rounded,
-                        iconColor: NuancePalette.warning,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Raphael',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(999),
-                          gradient: const LinearGradient(
-                            colors: [
-                              NuancePalette.primary,
-                              NuancePalette.secondary,
-                            ],
-                          ),
-                        ),
-                        child: Text(
-                          'Level 6: Analyst',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: const [
-                          _ProfileStat(
-                            value: '420',
-                            label: 'Total XP',
-                            color: NuancePalette.secondary,
-                          ),
-                          _ProfileStat(
-                            value: '7',
-                            label: 'Day Streak',
-                            color: NuancePalette.warning,
-                          ),
-                          _ProfileStat(
-                            value: '2',
-                            label: 'Badges',
-                            color: NuancePalette.success,
-                          ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Raphael',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 26,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      gradient: const LinearGradient(
+                        colors: [
+                          NuancePalette.primary,
+                          NuancePalette.secondary,
                         ],
+                      ),
+                    ),
+                    child: Text(
+                      'Level 6: Analyst',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: const [
+                      _ProfileStat(
+                        value: '420',
+                        label: 'Total XP',
+                        color: NuancePalette.secondary,
+                      ),
+                      _ProfileStat(
+                        value: '7',
+                        label: 'Day Streak',
+                        color: NuancePalette.warning,
+                      ),
+                      _ProfileStat(
+                        value: '2',
+                        label: 'Badges',
+                        color: NuancePalette.success,
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             const _PerformanceGrid(),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             NuanceCard(
-              borderColor: const Color(0xFFFCD34D),
+              borderColor: NuancePalette.cardYellowBorder,
+              gradientColors: [NuancePalette.cardYellowBg, Color(0xFFFEF3C7)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -107,30 +100,31 @@ class ProfileScreen extends StatelessWidget {
                     subtitle:
                         '${kBadges.where((b) => b.unlocked).length} of ${kBadges.length} earned',
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   ...kBadges.map(
                     (badge) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: _BadgeTile(badge: badge),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             NuanceCard(
-              borderColor: const Color(0xFFFBBF24),
-              backgroundColor: const Color(0xFFFFFBEB),
+              borderColor: NuancePalette.cardOrangeBorder,
+              gradientColors: [NuancePalette.cardOrangeBg, Color(0xFFFEF8C3)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Streak Tracker', style: theme.textTheme.titleMedium),
+                  Text('Streak Tracker', style: theme.textTheme.titleMedium?.copyWith(fontSize: 16)),
                   const SizedBox(height: 8),
                   Text(
                     'Keep learning daily to maintain your streak.',
                     style: theme.textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [

@@ -18,8 +18,9 @@ class ArenaScreen extends StatelessWidget {
     return NuanceGradientBackground(
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
           children: [
+            // Header
             Row(
               children: [
                 Expanded(
@@ -27,9 +28,10 @@ class ArenaScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Learn',
+                        '📚 Learn',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
+                          fontSize: 28,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -41,15 +43,19 @@ class ArenaScreen extends StatelessWidget {
                   ),
                 ),
                 const MascotBubble(
-                  size: 52,
+                  size: 56,
                   icon: Icons.lightbulb_rounded,
                   iconColor: NuancePalette.warning,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
+            
+            // Overall Progress Card
             NuanceCard(
-              borderColor: const Color(0xFFD8B4FE),
+              borderColor: NuancePalette.cardPurpleBorder,
+              gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -57,33 +63,41 @@ class ArenaScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Overall Progress',
-                        style: theme.textTheme.titleMedium,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontSize: 16,
+                        ),
                       ),
                       const Spacer(),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
+                          horizontal: 12,
+                          vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: NuancePalette.warning.withValues(alpha: 0.16),
+                          gradient: LinearGradient(
+                            colors: [
+                              NuancePalette.warning.withValues(alpha: 0.2),
+                              NuancePalette.warning.withValues(alpha: 0.15),
+                            ],
+                          ),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           '2/${kChallengeModules.length}',
                           style: theme.textTheme.labelMedium?.copyWith(
                             color: NuancePalette.warning,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
                       value: completion,
-                      minHeight: 11,
+                      minHeight: 12,
                       color: NuancePalette.secondary,
                       backgroundColor: const Color(0xFFE9D5FF),
                     ),
@@ -96,7 +110,8 @@ class ArenaScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 20),
+            
             SectionTitle(
               title: 'Practice Modules',
               subtitle: 'Pick a mode and stack XP.',
@@ -107,11 +122,11 @@ class ArenaScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             ...List.generate(kChallengeModules.length, (index) {
               final module = kChallengeModules[index];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: _ChallengeCard(
                   module: module,
                   index: index + 1,

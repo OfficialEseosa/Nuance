@@ -9,14 +9,32 @@ abstract final class NuancePalette {
   static const Color warning = Color(0xFFF59E0B);
   static const Color danger = Color(0xFFEF4444);
   static const Color accentBlue = Color(0xFF3B82F6);
+  // Web design pastel gradient colors
   static const Color gradientBlue = Color(0xFFDBEAFE);
-  static const Color gradientPurple = Color(0xFFE9D5FF);
+  static const Color gradientPurple = Color(0xFFF3E8FF);
   static const Color gradientPink = Color(0xFFFCE7F3);
+  // Card accent colors
+  static const Color cardOrangeBorder = Color(0xFFFEDCBA);
+  static const Color cardOrangeBg = Color(0xFFFEF3C7);
+  static const Color cardYellowBorder = Color(0xFFFEE08B);
+  static const Color cardYellowBg = Color(0xFFFEF08A);
+  static const Color cardPurpleBorder = Color(0xFFD8B4FE);
+  static const Color cardPurpleBg = Color(0xFFF3E8FF);
+  static const Color cardRedBorder = Color(0xFFFCA5A5);
+  static const Color cardRedBg = Color(0xFFFEE2E2);
+  static const Color cardBlueBorder = Color(0xFFBFDBFE);
+  static const Color cardBlueBg = Color(0xFFEFF6FF);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFF8FAFC);
   static const Color ink = Color(0xFF111827);
   static const Color mutedInk = Color(0xFF6B7280);
   static const Color border = Color(0xFFD1D5DB);
+  // Text colors for cards
+  static const Color orangeText = Color(0xFF92400E);
+  static const Color yellowText = Color(0xFF854D0E);
+  static const Color redText = Color(0xFFDC2626);
+  static const Color purpleText = Color(0xFF6D28D9);
+  static const Color blueText = Color(0xFF1E40AF);
 }
 
 ThemeData buildNuanceTheme() {
@@ -24,16 +42,19 @@ ThemeData buildNuanceTheme() {
 
   final textTheme = textBase.copyWith(
     headlineSmall: textBase.headlineSmall?.copyWith(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w800,
       color: NuancePalette.ink,
+      fontSize: 28,
     ),
     titleLarge: textBase.titleLarge?.copyWith(
       fontWeight: FontWeight.w700,
       color: NuancePalette.ink,
+      fontSize: 18,
     ),
     titleMedium: textBase.titleMedium?.copyWith(
       fontWeight: FontWeight.w700,
       color: NuancePalette.ink,
+      fontSize: 16,
     ),
     bodyLarge: textBase.bodyLarge?.copyWith(
       color: NuancePalette.ink,
@@ -48,6 +69,7 @@ ThemeData buildNuanceTheme() {
     bodySmall: textBase.bodySmall?.copyWith(
       color: NuancePalette.mutedInk,
       fontWeight: FontWeight.w500,
+      fontSize: 13,
     ),
     labelLarge: textBase.labelLarge?.copyWith(
       fontWeight: FontWeight.w700,
@@ -93,8 +115,9 @@ ThemeData buildNuanceTheme() {
       style: FilledButton.styleFrom(
         backgroundColor: NuancePalette.primary,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        textStyle: textTheme.labelLarge,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        textStyle: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
       ),
     ),
     chipTheme: ChipThemeData(

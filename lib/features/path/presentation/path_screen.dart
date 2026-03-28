@@ -18,8 +18,9 @@ class PathScreen extends StatelessWidget {
     return NuanceGradientBackground(
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
           children: [
+            // Header with Greeting
             Row(
               children: [
                 Expanded(
@@ -27,9 +28,10 @@ class PathScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Good morning, Raphael',
+                        'Good morning, Raphael! 👋',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
+                          fontSize: 28,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -40,10 +42,12 @@ class PathScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const MascotBubble(size: 52),
+                const MascotBubble(size: 56),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 24),
+            
+            // Stats Cards (with colored borders and gradients)
             Row(
               children: const [
                 Expanded(
@@ -52,26 +56,34 @@ class PathScreen extends StatelessWidget {
                     value: '7',
                     footnote: 'days',
                     icon: Icons.local_fire_department_rounded,
-                    top: Color(0xFFFBBF24),
-                    bottom: Color(0xFFF59E0B),
+                    borderColor: NuancePalette.cardOrangeBorder,
+                    gradientColors: [NuancePalette.cardOrangeBg, Color(0xFFFCD34D)],
+                    textColor: NuancePalette.orangeText,
+                    iconColor: Color(0xFFF59E0B),
                   ),
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: 12),
                 Expanded(
                   child: _TopStatCard(
                     label: 'Level',
                     value: '6',
                     footnote: 'Analyst',
                     icon: Icons.star_rounded,
-                    top: Color(0xFF60A5FA),
-                    bottom: Color(0xFF7C3AED),
+                    borderColor: NuancePalette.cardYellowBorder,
+                    gradientColors: [NuancePalette.cardYellowBg, Color(0xFFFCD34D)],
+                    textColor: NuancePalette.yellowText,
+                    iconColor: Color(0xFFDCBA34),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            
+            // XP Progress Card
             NuanceCard(
-              borderColor: const Color(0xFFD8B4FE),
+              borderColor: NuancePalette.cardPurpleBorder,
+              gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -80,15 +92,16 @@ class PathScreen extends StatelessWidget {
                       Icon(
                         Icons.auto_awesome_rounded,
                         color: NuancePalette.secondary,
+                        size: 18,
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Text(
                         'Level 6 Progress',
-                        style: theme.textTheme.labelLarge,
+                        style: theme.textTheme.labelLarge?.copyWith(fontSize: 14),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
@@ -106,38 +119,71 @@ class PathScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+            
+            // Trending Card
             NuanceCard(
-              backgroundColor: const Color(0xFFFFF1F2),
-              borderColor: const Color(0xFFFCA5A5),
+              borderColor: NuancePalette.cardRedBorder,
+              gradientColors: [NuancePalette.cardRedBg, Color(0xFFFEE2E2)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.trending_up_rounded,
+                        color: NuancePalette.danger,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Trending Now',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: NuancePalette.redText,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   Text(
-                    'Trending Now',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: NuancePalette.danger,
+                    'Climate package passes after high-stakes vote',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: NuancePalette.ink,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Climate package passes after high-stakes vote',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
                     'Compare 3 sources with opposite framing and earn +40 XP.',
                     style: theme.textTheme.bodySmall,
                   ),
-                  const SizedBox(height: 10),
-                  FilledButton.tonal(
-                    onPressed: () {},
-                    child: const Text('Compare Headlines'),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: () {},
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: NuancePalette.danger,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          side: const BorderSide(
+                            color: NuancePalette.cardRedBorder,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: const Text('Compare Headlines'),
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            
             SectionTitle(
               title: 'Learning Path',
               subtitle: kDailyFocus,
@@ -146,7 +192,7 @@ class PathScreen extends StatelessWidget {
                 child: const Text('Today'),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               children: const [
                 StatPill(
@@ -164,7 +210,7 @@ class PathScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             ...List.generate(kCampaignMissions.length, (index) {
               final mission = kCampaignMissions[index];
               return MissionNode(mission: mission, alignLeft: index.isEven);
@@ -182,60 +228,68 @@ class _TopStatCard extends StatelessWidget {
     required this.value,
     required this.footnote,
     required this.icon,
-    required this.top,
-    required this.bottom,
+    required this.borderColor,
+    required this.gradientColors,
+    required this.textColor,
+    required this.iconColor,
   });
 
   final String label;
   final String value;
   final String footnote;
   final IconData icon;
-  final Color top;
-  final Color bottom;
+  final Color borderColor;
+  final List<Color> gradientColors;
+  final Color textColor;
+  final Color iconColor;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return NuanceCard(
-      borderColor: Colors.transparent,
-      padding: const EdgeInsets.all(14),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              top.withValues(alpha: 0.15),
-              bottom.withValues(alpha: 0.24),
-            ],
+      borderColor: borderColor,
+      gradientColors: gradientColors,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 11,
+            ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(label, style: Theme.of(context).textTheme.labelLarge),
-                    const SizedBox(height: 6),
-                    Text(
-                      value,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w800),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    value,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 28,
+                      color: textColor,
                     ),
-                    Text(
-                      footnote,
-                      style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  Text(
+                    footnote,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: textColor,
+                      fontSize: 11,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Icon(icon, color: bottom, size: 30),
+              Icon(icon, color: iconColor, size: 40),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

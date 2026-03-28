@@ -5,6 +5,7 @@ class NuanceCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(18),
     this.backgroundColor,
+    this.gradientColors,
     this.borderColor,
     this.borderWidth = 2,
     this.radius = 20,
@@ -14,25 +15,33 @@ class NuanceCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets padding;
   final Color? backgroundColor;
+  final List<Color>? gradientColors;
   final Color? borderColor;
   final double borderWidth;
   final double radius;
 
   @override
   Widget build(BuildContext context) {
-    final color = backgroundColor ?? Theme.of(context).colorScheme.surface;
+    final bgColor = backgroundColor ?? Theme.of(context).colorScheme.surface;
     final outlineColor = borderColor ?? const Color(0xFFE5E7EB);
 
     return Container(
       decoration: BoxDecoration(
-        color: color,
+        color: gradientColors == null ? bgColor : null,
+        gradient: gradientColors != null
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors!,
+              )
+            : null,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: outlineColor, width: borderWidth),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x1C000000),
-            blurRadius: 14,
-            offset: Offset(0, 6),
+            color: const Color(0x19000000),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
           ),
         ],
       ),

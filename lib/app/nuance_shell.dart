@@ -48,13 +48,13 @@ class _NuanceShellState extends State<NuanceShell> {
             border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 2)),
             boxShadow: [
               BoxShadow(
-                color: Color(0x16000000),
-                blurRadius: 18,
-                offset: Offset(0, -6),
+                color: Color(0x1A000000),
+                blurRadius: 24,
+                offset: Offset(0, -8),
               ),
             ],
           ),
-          padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(_tabs.length, (index) {
@@ -69,22 +69,23 @@ class _NuanceShellState extends State<NuanceShell> {
                 onTap: () => setState(() => _selectedIndex = index),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                    horizontal: 12,
+                    vertical: 8,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(tab.icon, color: tint),
+                      Icon(tab.icon, color: tint, size: 24),
                       const SizedBox(height: 4),
                       Text(
                         tab.label,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: tint,
                           fontWeight: FontWeight.w700,
+                          fontSize: 11,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 180),
                         width: 4,

@@ -19,7 +19,7 @@ class LensScreen extends StatelessWidget {
     return NuanceGradientBackground(
       child: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 110),
           children: [
             Row(
               children: [
@@ -31,6 +31,7 @@ class LensScreen extends StatelessWidget {
                         'News Feed',
                         style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w800,
+                          fontSize: 28,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -42,32 +43,32 @@ class LensScreen extends StatelessWidget {
                   ),
                 ),
                 const MascotBubble(
-                  size: 52,
+                  size: 56,
                   icon: Icons.psychology_rounded,
                   iconColor: NuancePalette.primary,
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: const [
                   _CategoryChip(label: 'All', tint: NuancePalette.primary),
-                  SizedBox(width: 8),
+                  SizedBox(width: 10),
                   _CategoryChip(label: 'Politics', tint: Color(0xFF2563EB)),
-                  SizedBox(width: 8),
+                  SizedBox(width: 10),
                   _CategoryChip(label: 'Climate', tint: Color(0xFF22C55E)),
-                  SizedBox(width: 8),
+                  SizedBox(width: 10),
                   _CategoryChip(label: 'Global', tint: Color(0xFF7C3AED)),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             ...List.generate(kStoryPerspectives.length, (index) {
               final story = kStoryPerspectives[index];
               return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 14),
                 child: _PerspectiveCard(
                   perspective: story,
                   onTap: onOpenStoryCompare,
@@ -75,7 +76,9 @@ class LensScreen extends StatelessWidget {
               );
             }),
             NuanceCard(
-              borderColor: const Color(0xFFD8B4FE),
+              borderColor: NuancePalette.cardPurpleBorder,
+              gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -87,7 +90,7 @@ class LensScreen extends StatelessWidget {
                       child: const Text('Deep Dive'),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
                   ...kFrameSignals.map(_FrameSignalBar.new),
                 ],
               ),
