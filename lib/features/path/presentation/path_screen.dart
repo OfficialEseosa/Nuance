@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nuance/core/audio/sound_service.dart';
+import 'package:nuance/core/models/news_cluster.dart';
+import 'package:nuance/core/models/news_story.dart';
+import 'package:nuance/core/providers/news_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
@@ -14,7 +17,8 @@ class PathScreen extends StatefulWidget {
     super.key,
   });
 
-  final VoidCallback onOpenStoryCompare;
+  final void Function({NewsStory? story, NewsCluster? cluster})
+  onOpenStoryCompare;
   final VoidCallback onStartLearning;
 
   @override
@@ -190,6 +194,8 @@ class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final isDark = NuancePalette.isDark(context);
     final user = context.watch<UserProvider>().user;
+    final topStory = context.watch<NewsProvider>().topStory;
+    final topCluster = context.watch<NewsProvider>().topCluster;
 
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
@@ -370,7 +376,8 @@ class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Climate package passes after high-stakes vote',
+                        topStory?.title ??
+                            'Live story feed loading... check back in a moment',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -378,16 +385,21 @@ class _PathScreenState extends State<PathScreen> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Compare 3 sources with opposite framing and earn +40 XP.',
+                        topStory == null
+                            ? 'We are syncing real headlines from multiple sources.'
+                            : 'From ${topStory.source} (${topStory.leaning}). Compare framing and earn XP.',
                         style: theme.textTheme.bodySmall,
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton(
-                          onPressed: () {
-                            widget.onOpenStoryCompare();
-                          },
+                          onPressed: topStory == null
+                              ? null
+                              : () => widget.onOpenStoryCompare(
+                                  story: topStory,
+                                  cluster: topCluster,
+                                ),
                           style: FilledButton.styleFrom(
                             backgroundColor: isDark
                                 ? NuancePalette.darkSecondary

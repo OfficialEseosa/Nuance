@@ -98,6 +98,30 @@ class UserRepository {
     );
   }
 
+  Future<void> updateProgressStats(
+    int userId, {
+    int? streak,
+    int? completedLessons,
+    int? badges,
+  }) async {
+    final db = await _databaseService.database;
+    final updates = <String, Object>{
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+
+    if (streak != null) {
+      updates['streak'] = streak;
+    }
+    if (completedLessons != null) {
+      updates['completedLessons'] = completedLessons;
+    }
+    if (badges != null) {
+      updates['badges'] = badges;
+    }
+
+    await db.update('users', updates, where: 'id = ?', whereArgs: [userId]);
+  }
+
   Future<void> resetStats(int userId) async {
     final db = await _databaseService.database;
     await db.update(

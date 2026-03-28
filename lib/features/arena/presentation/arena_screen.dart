@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:nuance/core/audio/sound_service.dart';
-import 'package:provider/provider.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/providers/game_progress_provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
 import 'package:nuance/core/widgets/nuance_card.dart';
 import 'package:nuance/core/widgets/nuance_gradient_background.dart';
+import 'package:nuance/features/arena/presentation/module_quiz_screen.dart';
+import 'package:provider/provider.dart';
 
 class ArenaScreen extends StatefulWidget {
   const ArenaScreen({super.key});
@@ -26,7 +28,6 @@ class _ArenaScreenState extends State<ArenaScreen>
   late Animation<Offset> _headerSlide;
   late Animation<double> _progressFade;
   late Animation<Offset> _progressSlide;
-  final Set<int> _completedModuleIndices = <int>{};
 
   @override
   void initState() {
@@ -110,12 +111,13 @@ class _ArenaScreenState extends State<ArenaScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = context.watch<UserProvider>().user;
+    final progress = context.watch<GameProgressProvider>();
 
-    if (user == null) {
+    if (user == null || progress.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final completedLessons = _completedModuleIndices.length;
+    final completedLessons = progress.completedLessons;
     final totalLessons = kChallengeModules.length;
     final completion = totalLessons > 0 ? completedLessons / totalLessons : 0.0;
 
@@ -277,8 +279,8 @@ class _ArenaScreenState extends State<ArenaScreen>
                     child: _ChallengeCard(
                       module: module,
                       index: index + 1,
-                      completed: _isCompleted(index),
-                      locked: _isLocked(index),
+                      completed: _isCompleted(progress, index),
+                      locked: _isLocked(progress, index),
                       onPlay: () => _onModulePressed(index, module),
                     ),
                   ),
@@ -291,15 +293,20 @@ class _ArenaScreenState extends State<ArenaScreen>
     );
   }
 
-  bool _isCompleted(int index) => _completedModuleIndices.contains(index);
+  bool _isCompleted(GameProgressProvider progress, int index) {
+    return progress.isModuleCompleted(kChallengeModules[index].id);
+  }
 
-  bool _isLocked(int index) {
+  bool _isLocked(GameProgressProvider progress, int index) {
     if (index == 0) return false;
-    return !_completedModuleIndices.contains(index - 1);
+    return !progress.isModuleCompleted(kChallengeModules[index - 1].id);
   }
 
   Future<void> _onModulePressed(int index, ChallengeModule module) async {
-    if (_isLocked(index)) {
+    final progress = context.read<GameProgressProvider>();
+    final user = context.read<UserProvider>();
+
+    if (_isLocked(progress, index)) {
       SoundService.instance.playPop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -310,28 +317,70 @@ class _ArenaScreenState extends State<ArenaScreen>
       return;
     }
 
-    final alreadyCompleted = _isCompleted(index);
-    final xpReward = alreadyCompleted
-        ? (module.xpReward ~/ 3).clamp(5, module.xpReward)
-        : module.xpReward;
-
-    if (alreadyCompleted) {
-      SoundService.instance.playTap();
-    } else {
-      SoundService.instance.playSuccess();
-      setState(() => _completedModuleIndices.add(index));
+    final question = kChallengeQuestions[module.id];
+    if (question == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This module has no question configured yet.'),
+        ),
+      );
+      return;
     }
 
-    await context.read<UserProvider>().addXP(xpReward);
-    if (!mounted) return;
-
-    final action = alreadyCompleted ? 'Replay complete' : 'Module complete';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$action. +$xpReward XP'),
-        duration: const Duration(milliseconds: 1400),
+    final quizResult = await Navigator.of(context).push<ModuleQuizResult>(
+      MaterialPageRoute(
+        builder: (_) => ModuleQuizScreen(module: module, question: question),
       ),
     );
+
+    if (!mounted) return;
+    if (quizResult == null) return;
+    if (!quizResult.correct) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Incorrect answer. No XP this round.'),
+          duration: Duration(milliseconds: 1400),
+        ),
+      );
+      return;
+    }
+
+    final gameResult = await progress.playModule(
+      moduleId: module.id,
+      xpReward: module.xpReward,
+    );
+
+    if (gameResult.xpAwarded > 0) {
+      await user.addXP(gameResult.xpAwarded);
+    }
+    await user.syncProgress(
+      streak: progress.streakDays,
+      completedLessons: progress.completedLessons,
+      badges: progress.badgesCount,
+    );
+
+    if (!mounted) return;
+
+    final action = gameResult.firstCompletion
+        ? 'Module complete'
+        : 'Replay complete';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$action. +${gameResult.xpAwarded} XP'),
+        duration: const Duration(milliseconds: 1500),
+      ),
+    );
+
+    if (gameResult.newlyUnlockedBadges.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Badge unlocked: ${gameResult.newlyUnlockedBadges.join(', ')}',
+          ),
+          duration: const Duration(milliseconds: 1600),
+        ),
+      );
+    }
   }
 }
 

@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:nuance/core/audio/sound_service.dart';
-import 'package:nuance/core/data/mock_content.dart';
-import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/models/news_cluster.dart';
+import 'package:nuance/core/models/news_story.dart';
+import 'package:nuance/core/providers/game_progress_provider.dart';
+import 'package:nuance/core/providers/news_provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
@@ -13,7 +17,8 @@ import 'package:provider/provider.dart';
 class LensScreen extends StatefulWidget {
   const LensScreen({required this.onOpenStoryCompare, super.key});
 
-  final VoidCallback onOpenStoryCompare;
+  final void Function({NewsStory? story, NewsCluster? cluster})
+  onOpenStoryCompare;
 
   @override
   State<LensScreen> createState() => _LensScreenState();
@@ -22,42 +27,32 @@ class LensScreen extends StatefulWidget {
 class _LensScreenState extends State<LensScreen> {
   static const List<String> _categories = [
     'All',
+    'World',
     'Politics',
     'Climate',
-    'Global',
+    'Business',
+    'Tech',
   ];
 
   int _selectedCategoryIndex = 0;
-  final Set<String> _comparedSources = <String>{};
+  final Random _random = Random();
 
   String get _selectedCategory => _categories[_selectedCategoryIndex];
 
-  List<StoryPerspective> get _visibleStories {
-    switch (_selectedCategory) {
-      case 'Politics':
-        return kStoryPerspectives
-            .where(
-              (story) =>
-                  story.headline.toLowerCase().contains('senate') ||
-                  story.headline.toLowerCase().contains('package'),
-            )
-            .toList();
-      case 'Climate':
-        return kStoryPerspectives
-            .where((story) => story.headline.toLowerCase().contains('climate'))
-            .toList();
-      case 'Global':
-        return kStoryPerspectives
-            .where(
-              (story) =>
-                  story.source.toLowerCase().contains('national') ||
-                  story.source.toLowerCase().contains('frontier'),
-            )
-            .toList();
-      case 'All':
-      default:
-        return kStoryPerspectives;
-    }
+  List<NewsCluster> _filteredClusters(List<NewsCluster> clusters) {
+    final byCategory = _selectedCategory == 'All'
+        ? clusters
+        : clusters
+              .where((cluster) => cluster.category == _selectedCategory)
+              .toList(growable: false);
+    return byCategory
+        .where((cluster) => cluster.stories.length >= 2)
+        .toList(growable: false);
+  }
+
+  Future<void> _refreshNews() async {
+    SoundService.instance.playTap();
+    await context.read<NewsProvider>().refreshStories();
   }
 
   void _selectCategory(int index) {
@@ -66,26 +61,65 @@ class _LensScreenState extends State<LensScreen> {
     setState(() => _selectedCategoryIndex = index);
   }
 
-  Future<void> _openStoryCompare(StoryPerspective story) async {
-    widget.onOpenStoryCompare();
-
-    if (_comparedSources.contains(story.source)) return;
-
-    _comparedSources.add(story.source);
-    await context.read<UserProvider>().addXP(5);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Compared ${story.source}. +5 XP'),
-        duration: const Duration(milliseconds: 1400),
-      ),
+  Future<void> _openClusterCompare(NewsCluster cluster) async {
+    final progress = context.read<GameProgressProvider>();
+    final user = context.read<UserProvider>();
+    final result = await progress.recordStoryComparison(
+      storyId: cluster.id,
+      xpReward: 12,
     );
+
+    if (result.xpAwarded > 0) {
+      await user.addXP(result.xpAwarded);
+    }
+    await user.syncProgress(
+      streak: progress.streakDays,
+      completedLessons: progress.completedLessons,
+      badges: progress.badgesCount,
+    );
+
+    if (!mounted) return;
+    if (result.xpAwarded > 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Compared ${cluster.sources.length} sources. +${result.xpAwarded} XP',
+          ),
+          duration: const Duration(milliseconds: 1400),
+        ),
+      );
+      if (result.newlyUnlockedBadges.isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Badge unlocked: ${result.newlyUnlockedBadges.join(', ')}',
+            ),
+            duration: const Duration(milliseconds: 1600),
+          ),
+        );
+      }
+    }
+
+    widget.onOpenStoryCompare(story: cluster.primaryStory, cluster: cluster);
+  }
+
+  void _openRandomCluster(List<NewsCluster> clusters) {
+    if (clusters.isEmpty) return;
+    SoundService.instance.playTap();
+    final picked = clusters[_random.nextInt(clusters.length)];
+    _openClusterCompare(picked);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = NuancePalette.isDark(context);
+    final news = context.watch<NewsProvider>();
+    final clusters = _filteredClusters(news.clusters);
+    final radarStories = clusters.isEmpty
+        ? news.stories
+        : clusters.expand((cluster) => cluster.stories).toList(growable: false);
+    final signals = _buildSignals(radarStories);
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -107,10 +141,21 @@ class _LensScreenState extends State<LensScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'See all sides of the same story',
+                        news.error == null
+                            ? 'Compare the same event across multiple outlets'
+                            : news.error!,
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: news.isLoading ? null : _refreshNews,
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    color: news.isLoading
+                        ? NuancePalette.mutedInk
+                        : NuancePalette.darkAccent,
                   ),
                 ),
                 const MascotBubble(
@@ -120,7 +165,27 @@ class _LensScreenState extends State<LensScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${clusters.length} compare-ready stories',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: NuancePalette.mutedTextColor(context),
+                    ),
+                  ),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: clusters.isEmpty
+                      ? null
+                      : () => _openRandomCluster(clusters),
+                  icon: const Icon(Icons.casino_rounded, size: 16),
+                  label: const Text('Surprise Me'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -128,14 +193,17 @@ class _LensScreenState extends State<LensScreen> {
                   final label = _categories[index];
                   final tint = switch (label) {
                     'All' => NuancePalette.primary,
+                    'World' => const Color(0xFF60A5FA),
                     'Politics' => const Color(0xFF2563EB),
                     'Climate' => const Color(0xFF22C55E),
-                    'Global' => const Color(0xFF7C3AED),
+                    'Business' => const Color(0xFFF59E0B),
+                    'Tech' => const Color(0xFF7C3AED),
                     _ => NuancePalette.primary,
                   };
-
                   return Padding(
-                    padding: EdgeInsets.only(right: index == 3 ? 0 : 10),
+                    padding: EdgeInsets.only(
+                      right: index == _categories.length - 1 ? 0 : 10,
+                    ),
                     child: _CategoryChip(
                       label: label,
                       tint: tint,
@@ -147,29 +215,36 @@ class _LensScreenState extends State<LensScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            ...List.generate(_visibleStories.length, (index) {
-              final story = _visibleStories[index];
-              return Padding(
+            if (news.isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ...clusters.map(
+              (cluster) => Padding(
                 padding: const EdgeInsets.only(bottom: 14),
-                child: _PerspectiveCard(
-                  perspective: story,
-                  onTap: () => _openStoryCompare(story),
+                child: _ClusterCard(
+                  cluster: cluster,
+                  onTap: () => _openClusterCompare(cluster),
                 ),
-              );
-            }),
-            if (_visibleStories.isEmpty)
+              ),
+            ),
+            if (!news.isLoading && clusters.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: NuanceCard(
                   child: Text(
-                    'No stories found for $_selectedCategory right now.',
+                    'No multi-source clusters found for $_selectedCategory right now.',
                     style: theme.textTheme.bodyMedium,
                   ),
                 ),
               ),
             NuanceCard(
               borderColor: NuancePalette.cardPurpleBorder,
-              gradientColors: [NuancePalette.cardPurpleBg, Color(0xFFF3E8FF)],
+              gradientColors: const [
+                NuancePalette.cardPurpleBg,
+                Color(0xFFF3E8FF),
+              ],
               darkGradientColors: const [
                 NuancePalette.darkCard,
                 NuancePalette.darkSurface,
@@ -180,17 +255,16 @@ class _LensScreenState extends State<LensScreen> {
                 children: [
                   SectionTitle(
                     title: 'Frame Radar',
-                    subtitle: 'How outlets currently shape this story.',
+                    subtitle: 'Signals generated from live clusters.',
                     trailing: FilledButton.tonal(
-                      onPressed: () {
-                        SoundService.instance.playTap();
-                        widget.onOpenStoryCompare();
-                      },
+                      onPressed: clusters.isEmpty
+                          ? null
+                          : () => _openClusterCompare(clusters.first),
                       child: const Text('Deep Dive'),
                     ),
                   ),
                   const SizedBox(height: 14),
-                  ...kFrameSignals.map(
+                  ...signals.map(
                     (signal) => _FrameSignalBar(signal, isDark: isDark),
                   ),
                 ],
@@ -201,28 +275,74 @@ class _LensScreenState extends State<LensScreen> {
       ),
     );
   }
+
+  List<_SignalMetric> _buildSignals(List<NewsStory> stories) {
+    if (stories.isEmpty) {
+      return const [
+        _SignalMetric(label: 'Emotion-Led Language', value: 0.0),
+        _SignalMetric(label: 'Source Diversity', value: 0.0),
+        _SignalMetric(label: 'Policy Detail Depth', value: 0.0),
+        _SignalMetric(label: 'Claim Verification Cues', value: 0.0),
+      ];
+    }
+
+    final sensationalWords = ['shocking', 'outrage', 'slam', 'crisis', 'chaos'];
+    var emotionalCount = 0;
+    var detailCount = 0;
+    var verificationCueCount = 0;
+    final sources = <String>{};
+
+    for (final story in stories) {
+      final text = '${story.title} ${story.summary}'.toLowerCase();
+      if (sensationalWords.any(text.contains)) {
+        emotionalCount += 1;
+      }
+      if (text.contains('according to') ||
+          text.contains('report') ||
+          text.contains('data') ||
+          text.contains('analysis')) {
+        detailCount += 1;
+      }
+      if (text.contains('officials said') ||
+          text.contains('documents') ||
+          text.contains('investigation') ||
+          text.contains('evidence')) {
+        verificationCueCount += 1;
+      }
+      sources.add(story.source);
+    }
+
+    final total = stories.length;
+    final maxDiversity = 6;
+    return [
+      _SignalMetric(
+        label: 'Emotion-Led Language',
+        value: emotionalCount / total,
+      ),
+      _SignalMetric(
+        label: 'Source Diversity',
+        value: (sources.length / maxDiversity).clamp(0, 1).toDouble(),
+      ),
+      _SignalMetric(label: 'Policy Detail Depth', value: detailCount / total),
+      _SignalMetric(
+        label: 'Claim Verification Cues',
+        value: verificationCueCount / total,
+      ),
+    ];
+  }
 }
 
-class _PerspectiveCard extends StatelessWidget {
-  const _PerspectiveCard({required this.perspective, required this.onTap});
+class _ClusterCard extends StatelessWidget {
+  const _ClusterCard({required this.cluster, required this.onTap});
 
-  final StoryPerspective perspective;
+  final NewsCluster cluster;
   final VoidCallback onTap;
-
-  Color get _leaningColor {
-    final leaning = perspective.leaning.toLowerCase();
-    if (leaning.contains('left')) {
-      return const Color(0xFF2D86D8);
-    }
-    if (leaning.contains('right')) {
-      return const Color(0xFFE15D52);
-    }
-    return NuancePalette.primary;
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final sources = cluster.stories.map((s) => s.source).take(3).toList();
+    final moreCount = cluster.sources.length - sources.length;
 
     return InkWell(
       borderRadius: BorderRadius.circular(20),
@@ -239,82 +359,103 @@ class _PerspectiveCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: _leaningColor.withValues(alpha: 0.16),
+                    color: NuancePalette.primary.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    perspective.leaning,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: _leaningColor,
-                    ),
+                    cluster.category,
+                    style: theme.textTheme.labelSmall,
                   ),
                 ),
-                const Spacer(),
-                if (perspective.credibilityScore > 84)
+                const SizedBox(width: 8),
+                if (cluster.isSynthesized)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
+                      color: NuancePalette.warning.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(999),
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFF97316), Color(0xFFEF4444)],
-                      ),
                     ),
                     child: Text(
-                      'Trending',
+                      'Auto-Matched',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
+                        color: NuancePalette.warning,
+                      ),
+                    ),
+                  ),
+                const Spacer(),
+                Text(
+                  '${cluster.sources.length} sources',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: NuancePalette.mutedTextColor(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              cluster.topicTitle,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final source in sources)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NuancePalette.darkSecondary.withValues(
+                        alpha: 0.35,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(
+                        color: NuancePalette.borderColor(context),
+                      ),
+                    ),
+                    child: Text(source, style: theme.textTheme.labelSmall),
+                  ),
+                if (moreCount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: NuancePalette.secondary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '+$moreCount more',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: NuancePalette.secondary,
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(perspective.source, style: theme.textTheme.labelLarge),
-            const SizedBox(height: 4),
-            Text(perspective.headline, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 10),
-            Text(perspective.framingNote, style: theme.textTheme.bodySmall),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Row(
               children: [
-                Text(
-                  '3 sources',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Compare framing and take challenge',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall,
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF60A5FA),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 3),
-                Container(
-                  width: 10,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF9CA3AF),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                ),
-                const SizedBox(width: 3),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF87171),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const Spacer(),
                 Text(
                   'Compare ->',
                   style: theme.textTheme.labelLarge?.copyWith(
@@ -330,10 +471,17 @@ class _PerspectiveCard extends StatelessWidget {
   }
 }
 
+class _SignalMetric {
+  const _SignalMetric({required this.label, required this.value});
+
+  final String label;
+  final double value;
+}
+
 class _FrameSignalBar extends StatelessWidget {
   const _FrameSignalBar(this.signal, {required this.isDark});
 
-  final FrameSignal signal;
+  final _SignalMetric signal;
   final bool isDark;
 
   @override

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nuance/core/data/mock_content.dart';
 import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/providers/game_progress_provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/core/widgets/mascot_bubble.dart';
@@ -44,12 +45,24 @@ class ProfileScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = NuancePalette.isDark(context);
     final user = context.watch<UserProvider>().user;
+    final progress = context.watch<GameProgressProvider>();
 
-    if (user == null) {
+    if (user == null || progress.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final levelTitle = _getLevelTitle(user.level);
+    final badgeStates = kBadges
+        .map(
+          (badge) => BadgeProgress(
+            name: badge.name,
+            description: badge.description,
+            unlocked: progress.unlockedBadges.contains(badge.name),
+          ),
+        )
+        .toList(growable: false);
+    final badgesCount = progress.badgesCount;
+    final activeDays = progress.streakDays.clamp(0, 7);
 
     return NuanceGradientBackground(
       child: SafeArea(
@@ -117,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
                         color: NuancePalette.warning,
                       ),
                       _ProfileStat(
-                        value: '${user.badges}',
+                        value: '$badgesCount',
                         label: 'Badges',
                         color: NuancePalette.success,
                       ),
@@ -127,7 +140,12 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 18),
-            const _PerformanceGrid(),
+            _PerformanceGrid(
+              storiesCompared: progress.storiesCompared,
+              biasFlags: progress.biasFlags,
+              accuracy: progress.accuracyPercent,
+              streakDays: progress.streakDays,
+            ),
             const SizedBox(height: 18),
             NuanceCard(
               borderColor: NuancePalette.cardYellowBorder,
@@ -142,11 +160,10 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   SectionTitle(
                     title: 'Badge Collection',
-                    subtitle:
-                        '${kBadges.where((b) => b.unlocked).length} of ${kBadges.length} earned',
+                    subtitle: '$badgesCount of ${kBadges.length} earned',
                   ),
                   const SizedBox(height: 12),
-                  ...kBadges.map(
+                  ...badgeStates.map(
                     (badge) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _BadgeTile(badge: badge),
@@ -179,14 +196,14 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      _DayBubble(label: 'M', active: true),
-                      _DayBubble(label: 'T', active: true),
-                      _DayBubble(label: 'W', active: true),
-                      _DayBubble(label: 'T', active: true),
-                      _DayBubble(label: 'F', active: true),
-                      _DayBubble(label: 'S', active: true),
-                      _DayBubble(label: 'S', active: false),
+                    children: [
+                      _DayBubble(label: 'M', active: activeDays >= 1),
+                      _DayBubble(label: 'T', active: activeDays >= 2),
+                      _DayBubble(label: 'W', active: activeDays >= 3),
+                      _DayBubble(label: 'T', active: activeDays >= 4),
+                      _DayBubble(label: 'F', active: activeDays >= 5),
+                      _DayBubble(label: 'S', active: activeDays >= 6),
+                      _DayBubble(label: 'S', active: activeDays >= 7),
                     ],
                   ),
                 ],
@@ -228,7 +245,17 @@ class _ProfileStat extends StatelessWidget {
 }
 
 class _PerformanceGrid extends StatelessWidget {
-  const _PerformanceGrid();
+  const _PerformanceGrid({
+    required this.storiesCompared,
+    required this.biasFlags,
+    required this.accuracy,
+    required this.streakDays,
+  });
+
+  final int storiesCompared;
+  final int biasFlags;
+  final int accuracy;
+  final int streakDays;
 
   @override
   Widget build(BuildContext context) {
@@ -240,37 +267,39 @@ class _PerformanceGrid extends StatelessWidget {
           subtitle: 'Your current media literacy momentum.',
         ),
         const SizedBox(height: 10),
-        GridView.count(
+        GridView(
           shrinkWrap: true,
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1.6,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            mainAxisExtent: 104,
+          ),
           physics: const NeverScrollableScrollPhysics(),
-          children: const [
+          children: [
             _MetricCard(
               label: 'Stories Compared',
-              value: '18',
+              value: '$storiesCompared',
               icon: Icons.compare_rounded,
-              tint: Color(0xFFDBEAFE),
+              tint: const Color(0xFFDBEAFE),
             ),
             _MetricCard(
               label: 'Bias Flags',
-              value: '41',
+              value: '$biasFlags',
               icon: Icons.flag_rounded,
-              tint: Color(0xFFFEE2E2),
+              tint: const Color(0xFFFEE2E2),
             ),
             _MetricCard(
               label: 'Accuracy',
-              value: '84%',
+              value: '$accuracy%',
               icon: Icons.insights_rounded,
-              tint: Color(0xFFDCFCE7),
+              tint: const Color(0xFFDCFCE7),
             ),
             _MetricCard(
               label: 'Streak',
-              value: '7 days',
+              value: '$streakDays days',
               icon: Icons.local_fire_department_rounded,
-              tint: Color(0xFFFEF3C7),
+              tint: const Color(0xFFFEF3C7),
             ),
           ],
         ),
@@ -298,6 +327,7 @@ class _MetricCard extends StatelessWidget {
     final textColor = Theme.of(context).colorScheme.onSurface;
 
     return NuanceCard(
+      padding: const EdgeInsets.all(14),
       backgroundColor: tint,
       borderColor: Colors.transparent,
       darkGradientColors: const [
@@ -306,18 +336,28 @@ class _MetricCard extends StatelessWidget {
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Icon(icon, color: textColor),
-          const Spacer(),
+          const SizedBox(height: 6),
           Text(
             value,
             style: theme.textTheme.titleMedium?.copyWith(
               color: textColor,
               fontWeight: FontWeight.w700,
+              fontSize: 15,
+              height: 1.2,
             ),
           ),
-          const SizedBox(height: 2),
-          Text(label, style: theme.textTheme.bodySmall),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontSize: 12,
+              height: 1.2,
+            ),
+          ),
         ],
       ),
     );

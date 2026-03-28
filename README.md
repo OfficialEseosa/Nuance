@@ -8,20 +8,23 @@ Nuance is a gamified media-literacy app concept: Ground News-style perspective c
 - shared design system based on the imported React/Figma design (`History Learning App`)
 - dark mode by default with a Duolingo-inspired game UI direction
 - mock data for missions, perspectives, challenges, and badges
+- live RSS news ingestion (multi-source) with automatic fallback if feeds fail
+- event clustering so `Compare` opens the same topic across multiple outlets
 - separate feature folders so work can be split by screen
 - UI sound effects for taps/success events (`assets/sfx`)
 - global `Sound Effects` toggle in Settings (persisted across launches)
+- persistent game progress (completed modules, comparisons, challenge accuracy, badges, streak)
 
 ## Current Screens
 
 - `Home` (`features/path`)  
   Gamified dashboard with streak, level progress, trending story, and learning path.
 - `News` (`features/lens`)  
-  Story perspective feed with framing signals and source credibility.
+  Live multi-source feed with category filters, refresh, and compare flow.
 - `Story Comparison` (`features/lens/story_compare_screen.dart`)  
-  Side-by-side framing breakdown with challenge prompt.
+  Multi-source event breakdown with dynamic challenge variants (`Shuffle`).
 - `Learn` (`features/arena`)  
-  Lesson progression cards and challenge modules.
+  Lesson progression cards with playable mini-quiz modules.
 - `Profile` (`features/profile`)  
   Level identity, performance metrics, badges, and streak tracker.
 

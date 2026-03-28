@@ -43,6 +43,7 @@ class FrameSignal {
 
 class ChallengeModule {
   const ChallengeModule({
+    required this.id,
     required this.title,
     required this.description,
     required this.difficulty,
@@ -50,11 +51,28 @@ class ChallengeModule {
     required this.xpReward,
   });
 
+  final String id;
   final String title;
   final String description;
   final String difficulty;
   final String duration;
   final int xpReward;
+}
+
+class ChallengeQuestion {
+  const ChallengeQuestion({
+    required this.moduleId,
+    required this.prompt,
+    required this.options,
+    required this.correctIndex,
+    required this.explanation,
+  });
+
+  final String moduleId;
+  final String prompt;
+  final List<String> options;
+  final int correctIndex;
+  final String explanation;
 }
 
 class BadgeProgress {

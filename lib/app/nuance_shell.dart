@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:nuance/core/audio/sound_service.dart';
+import 'package:nuance/core/models/news_cluster.dart';
+import 'package:nuance/core/models/news_story.dart';
+import 'package:nuance/core/providers/game_progress_provider.dart';
+import 'package:nuance/core/providers/news_provider.dart';
 import 'package:nuance/core/providers/user_provider.dart';
 import 'package:nuance/core/theme/nuance_theme.dart';
 import 'package:nuance/features/arena/presentation/arena_screen.dart';
@@ -19,6 +23,7 @@ class NuanceShell extends StatefulWidget {
 
 class _NuanceShellState extends State<NuanceShell> {
   int _selectedIndex = 0;
+  bool _bootstrapped = false;
 
   static const _tabs = [
     _ShellTab(
@@ -52,15 +57,38 @@ class _NuanceShellState extends State<NuanceShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<UserProvider>().initializeUser();
+      _bootstrap();
     });
   }
 
-  void _openStoryCompare() {
+  Future<void> _bootstrap() async {
+    if (_bootstrapped) return;
+    _bootstrapped = true;
+
+    final userProvider = context.read<UserProvider>();
+    final newsProvider = context.read<NewsProvider>();
+    final progressProvider = context.read<GameProgressProvider>();
+
+    await userProvider.initializeUser();
+    await Future.wait([
+      newsProvider.initialize(),
+      progressProvider.initialize(),
+    ]);
+
+    await userProvider.syncProgress(
+      streak: progressProvider.streakDays,
+      completedLessons: progressProvider.completedLessons,
+      badges: progressProvider.badgesCount,
+    );
+  }
+
+  void _openStoryCompare({NewsStory? story, NewsCluster? cluster}) {
     SoundService.instance.playTap();
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute<void>(builder: (_) => const StoryCompareScreen()));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StoryCompareScreen(story: story, cluster: cluster),
+      ),
+    );
   }
 
   void _openLearnTab() {
@@ -136,7 +164,10 @@ class _NuanceShellState extends State<NuanceShell> {
             user: user,
             onUsernameChanged: (newUsername) =>
                 userProvider.updateUsername(newUsername),
-            onResetStats: userProvider.resetStats,
+            onResetStats: () {
+              userProvider.resetStats();
+              context.read<GameProgressProvider>().reset();
+            },
           ),
         ];
 

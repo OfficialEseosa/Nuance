@@ -66,6 +66,31 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> syncProgress({
+    int? streak,
+    int? completedLessons,
+    int? badges,
+  }) async {
+    if (_user == null) return;
+    try {
+      await _repository.updateProgressStats(
+        _user!.id!,
+        streak: streak,
+        completedLessons: completedLessons,
+        badges: badges,
+      );
+      _user = _user!.copyWith(
+        streak: streak ?? _user!.streak,
+        completedLessons: completedLessons ?? _user!.completedLessons,
+        badges: badges ?? _user!.badges,
+      );
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> resetStats() async {
     if (_user == null) return;
     try {

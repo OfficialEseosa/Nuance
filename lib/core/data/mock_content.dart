@@ -81,6 +81,7 @@ const List<FrameSignal> kFrameSignals = [
 
 const List<ChallengeModule> kChallengeModules = [
   ChallengeModule(
+    id: 'bias_blitz',
     title: 'Bias Blitz',
     description: 'Classify 10 headlines by framing in under 90 seconds.',
     difficulty: 'Fast',
@@ -88,6 +89,7 @@ const List<ChallengeModule> kChallengeModules = [
     xpReward: 40,
   ),
   ChallengeModule(
+    id: 'context_rescue',
     title: 'Context Rescue',
     description: 'Pick the strongest missing context statement.',
     difficulty: 'Medium',
@@ -95,6 +97,7 @@ const List<ChallengeModule> kChallengeModules = [
     xpReward: 55,
   ),
   ChallengeModule(
+    id: 'source_showdown',
     title: 'Source Showdown',
     description: 'Rank sources by evidence quality and transparency.',
     difficulty: 'Hard',
@@ -102,6 +105,45 @@ const List<ChallengeModule> kChallengeModules = [
     xpReward: 70,
   ),
 ];
+
+const Map<String, ChallengeQuestion> kChallengeQuestions = {
+  'bias_blitz': ChallengeQuestion(
+    moduleId: 'bias_blitz',
+    prompt: 'Which headline is the most emotionally loaded?',
+    options: [
+      'Budget proposal passes with a 52-48 vote',
+      'Shocking budget betrayal sparks outrage nationwide',
+      'Lawmakers release fiscal impact summary',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Words like "shocking" and "betrayal" inject emotional framing.',
+  ),
+  'context_rescue': ChallengeQuestion(
+    moduleId: 'context_rescue',
+    prompt: 'What missing context best improves this climate-policy story?',
+    options: [
+      'How much each policy phase costs over ten years',
+      'Which celebrity tweeted about the vote',
+      'A poll with no sample-size disclosure',
+    ],
+    correctIndex: 0,
+    explanation:
+        'Cost timeline context strengthens understanding across viewpoints.',
+  ),
+  'source_showdown': ChallengeQuestion(
+    moduleId: 'source_showdown',
+    prompt: 'Which source ranking is strongest for credibility?',
+    options: [
+      'Anonymous blog > outlet with correction log > primary documents',
+      'Primary documents > transparent newsroom > unverified repost',
+      'Viral thread > opinion-only site > unnamed source screenshots',
+    ],
+    correctIndex: 1,
+    explanation:
+        'Primary documents and transparent editorial standards are strongest.',
+  ),
+};
 
 const List<BadgeProgress> kBadges = [
   BadgeProgress(
