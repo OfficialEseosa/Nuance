@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Local React/Figma export workspace (do not commit)
+/History Learning App/

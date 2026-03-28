@@ -1,31 +1,57 @@
 # Nuance
 
-Nuance is a Flutter app concept for people who want the breadth and framing-awareness of Ground News, but with the retention loop and progression mechanics of a Duolingo-style product.
+Nuance is a gamified media-literacy app concept: Ground News-style perspective comparison wrapped in a Duolingo-style progression loop.
 
-This repository is the cleaned starter project:
+## What This Skeleton Includes
 
-- the default Flutter counter demo has been removed
-- the app boots into a neutral placeholder screen
-- the project is ready for design, information architecture, and gameplay iteration
+- multi-screen starter architecture
+- shared design system based on the imported React/Figma design (`History Learning App`)
+- mock data for missions, perspectives, challenges, and badges
+- separate feature folders so work can be split by screen
 
-## Product Direction
+## Current Screens
 
-Current working idea:
+- `Home` (`features/path`)  
+  Gamified dashboard with streak, level progress, trending story, and learning path.
+- `News` (`features/lens`)  
+  Story perspective feed with framing signals and source credibility.
+- `Story Comparison` (`features/lens/story_compare_screen.dart`)  
+  Side-by-side framing breakdown with challenge prompt.
+- `Learn` (`features/arena`)  
+  Lesson progression cards and challenge modules.
+- `Profile` (`features/profile`)  
+  Level identity, performance metrics, badges, and streak tracker.
 
-- surface the same story through multiple perspectives
-- reward users for consistent reading and comparison habits
-- make media literacy feel lightweight, repeatable, and measurable
+## Suggested Team Split
 
-## Getting Started
+Use this to minimize overlap and merge pain:
+
+- Person A ownership:
+  - `lib/features/path/**`
+  - `lib/features/arena/**`
+- Person B ownership:
+  - `lib/features/lens/**`
+  - `lib/features/profile/**`
+- Shared files (coordinate before edits):
+  - `lib/core/theme/nuance_theme.dart`
+  - `lib/core/widgets/**`
+  - `lib/app/nuance_shell.dart`
+  - `lib/core/data/mock_content.dart`
+
+## Local Design Source
+
+- `History Learning App/` is intentionally ignored via `.gitignore` so it will not be committed.
+
+## Run
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-## Next Build Steps
+## Next Technical Milestones
 
-- define the onboarding and daily session loop
-- choose the first progression mechanic: streaks, XP, or levels
-- design the core story card and comparison view
-- decide how source bias, ownership, and framing should be represented
+- replace mock data with real story ingestion pipeline
+- define challenge scoring logic and XP economy
+- add persistent progress state
+- add onboarding + account bootstrap flow

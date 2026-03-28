@@ -1,0 +1,360 @@
+import 'package:flutter/material.dart';
+import 'package:nuance/core/data/mock_content.dart';
+import 'package:nuance/core/models/nuance_models.dart';
+import 'package:nuance/core/theme/nuance_theme.dart';
+import 'package:nuance/core/widgets/mascot_bubble.dart';
+import 'package:nuance/core/widgets/nuance_card.dart';
+import 'package:nuance/core/widgets/nuance_gradient_background.dart';
+import 'package:nuance/core/widgets/section_title.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return NuanceGradientBackground(
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+          children: [
+            NuanceCard(
+              borderColor: const Color(0xFFD8B4FE),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFF5F3FF), Color(0xFFDBEAFE)],
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      const MascotBubble(
+                        size: 64,
+                        icon: Icons.emoji_events_rounded,
+                        iconColor: NuancePalette.warning,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Raphael',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(999),
+                          gradient: const LinearGradient(
+                            colors: [
+                              NuancePalette.primary,
+                              NuancePalette.secondary,
+                            ],
+                          ),
+                        ),
+                        child: Text(
+                          'Level 6: Analyst',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: const [
+                          _ProfileStat(
+                            value: '420',
+                            label: 'Total XP',
+                            color: NuancePalette.secondary,
+                          ),
+                          _ProfileStat(
+                            value: '7',
+                            label: 'Day Streak',
+                            color: NuancePalette.warning,
+                          ),
+                          _ProfileStat(
+                            value: '2',
+                            label: 'Badges',
+                            color: NuancePalette.success,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            const _PerformanceGrid(),
+            const SizedBox(height: 14),
+            NuanceCard(
+              borderColor: const Color(0xFFFCD34D),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SectionTitle(
+                    title: 'Badge Collection',
+                    subtitle:
+                        '${kBadges.where((b) => b.unlocked).length} of ${kBadges.length} earned',
+                  ),
+                  const SizedBox(height: 10),
+                  ...kBadges.map(
+                    (badge) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: _BadgeTile(badge: badge),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            NuanceCard(
+              borderColor: const Color(0xFFFBBF24),
+              backgroundColor: const Color(0xFFFFFBEB),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Streak Tracker', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Keep learning daily to maintain your streak.',
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      _DayBubble(label: 'M', active: true),
+                      _DayBubble(label: 'T', active: true),
+                      _DayBubble(label: 'W', active: true),
+                      _DayBubble(label: 'T', active: true),
+                      _DayBubble(label: 'F', active: true),
+                      _DayBubble(label: 'S', active: true),
+                      _DayBubble(label: 'S', active: false),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileStat extends StatelessWidget {
+  const _ProfileStat({
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  final String value;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
+class _PerformanceGrid extends StatelessWidget {
+  const _PerformanceGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionTitle(
+          title: 'Performance Overview',
+          subtitle: 'Your current media literacy momentum.',
+        ),
+        const SizedBox(height: 10),
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.6,
+          physics: const NeverScrollableScrollPhysics(),
+          children: const [
+            _MetricCard(
+              label: 'Stories Compared',
+              value: '18',
+              icon: Icons.compare_rounded,
+              tint: Color(0xFFDBEAFE),
+            ),
+            _MetricCard(
+              label: 'Bias Flags',
+              value: '41',
+              icon: Icons.flag_rounded,
+              tint: Color(0xFFFEE2E2),
+            ),
+            _MetricCard(
+              label: 'Accuracy',
+              value: '84%',
+              icon: Icons.insights_rounded,
+              tint: Color(0xFFDCFCE7),
+            ),
+            _MetricCard(
+              label: 'Streak',
+              value: '7 days',
+              icon: Icons.local_fire_department_rounded,
+              tint: Color(0xFFFEF3C7),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MetricCard extends StatelessWidget {
+  const _MetricCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.tint,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color tint;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return NuanceCard(
+      backgroundColor: tint,
+      borderColor: Colors.transparent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: NuancePalette.ink),
+          const Spacer(),
+          Text(
+            value,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: NuancePalette.ink,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(label, style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+class _BadgeTile extends StatelessWidget {
+  const _BadgeTile({required this.badge});
+
+  final BadgeProgress badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tint = badge.unlocked
+        ? NuancePalette.warning
+        : const Color(0xFF9CA3AF);
+
+    return NuanceCard(
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: tint.withValues(alpha: 0.16),
+            child: Icon(
+              badge.unlocked ? Icons.emoji_events_rounded : Icons.lock_rounded,
+              color: tint,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  badge.name,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: NuancePalette.ink,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(badge.description, style: theme.textTheme.bodySmall),
+              ],
+            ),
+          ),
+          if (badge.unlocked)
+            Text(
+              'Unlocked',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: NuancePalette.warning,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DayBubble extends StatelessWidget {
+  const _DayBubble({required this.label, required this.active});
+
+  final String label;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = active ? const Color(0xFFF59E0B) : const Color(0xFFE5E7EB);
+    final fg = active ? Colors.white : NuancePalette.mutedInk;
+
+    return Column(
+      children: [
+        Text(label, style: Theme.of(context).textTheme.labelSmall),
+        const SizedBox(height: 4),
+        Container(
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+          child: Icon(
+            active
+                ? Icons.local_fire_department_rounded
+                : Icons.circle_outlined,
+            size: 16,
+            color: fg,
+          ),
+        ),
+      ],
+    );
+  }
+}
